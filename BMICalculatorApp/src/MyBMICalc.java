@@ -3,46 +3,64 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class MyBMICalc {
-    private JLabel BodyCalculator;
+    public JPanel mainPanel;
     private JTextField inputWeight;
     private JTextField inputHeight;
     private JButton calculateButton;
-    private JComboBox comboBox1;
-    private JComboBox comboBox2;
+    private JComboBox<String> comboBox1; // weight units
+    private JComboBox<String> comboBox2; // height units
+    private JLabel valueLabel;
+    private JLabel statusLabel;
+    private JLabel bodyCalculator;
+    private JLabel heightLabel;
+    private JLabel weightLabel;
+    private JLabel outputLabel;
+    private JLabel outputStatusLabel;
 
     public MyBMICalc() {
-        inputHeight.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String heightString = inputHeight.getText();
-                double height = Double.parseDouble(heightString);
-                System.out.println("height: " + height);
-            }
-        });
-        inputWeight.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String weightString = inputWeight.getText();
-                double weight = Double.parseDouble(weightString);
-                System.out.println("Weight: " + weight);
-            }
-        });
-        calculateButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String dropResults = comboBox1.getSelectedItem();
-            }
-        });
-        comboBox1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        // Fill combo boxes
+        comboBox1.addItem("kg");
+        comboBox1.addItem("lb");
+        comboBox2.addItem("m");
+        comboBox2.addItem("cm");
 
-            }
-        });
-
+        calculateButton.addActionListener(e -> calculateBMI());
     }
 
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
+    private void calculateBMI() {
+        double weight, height;
+
+        try {
+            weight = Double.parseDouble(inputWeight.getText());
+            height = Double.parseDouble(inputHeight.getText());
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(null, "Enter valid numbers!");
+            return;
+        }
+
+        // Convert units if needed
+        if ("lb".equals(comboBox1.getSelectedItem())) {
+            weight *= 0.453592; // lb to kg
+        }
+
+        if ("cm".equals(comboBox2.getSelectedItem())) {
+            height /= 100; // cm to meters
+        }
+
+        if (height <= 0) {
+            JOptionPane.showMessageDialog(null, "Height must be positive!");
+            return;
+        }
+
+        double bmi = weight / (height * height);
+        outputLabel.setText(String.format("%.2f", bmi));
+        outputStatusLabel.setText(getStatus(bmi));
+    }
+
+    private String getStatus(double bmi) {
+        if (bmi < 18.5) return "Underweight";
+        else if (bmi < 25) return "Normal";
+        else if (bmi < 30) return "Overweight";
+        else return "Obese";
     }
 }
