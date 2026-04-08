@@ -111,14 +111,26 @@ CREATE TABLE medical (
 CREATE TABLE medical_attendance (
                                     attendance_id CHAR(12),
                                     ref_no CHAR(6),
-
                                     PRIMARY KEY (attendance_id, ref_no),
-
                                     FOREIGN KEY (attendance_id)
-                                        REFERENCES attendance(attendance_id) ON DELETE CASCADE,
-
+                                    REFERENCES attendance(attendance_id) ON DELETE CASCADE,
                                     FOREIGN KEY (ref_no)
-                                        REFERENCES medical(ref_no) ON DELETE CASCADE
+                                    REFERENCES medical(ref_no) ON DELETE CASCADE
+);
+
+CREATE TABLE exam_medical (
+                              ex_med_ref_no CHAR(12) PRIMARY KEY,   -- unique ID for this exam medical
+                              stu_id CHAR(12) NOT NULL,             -- student
+                              course_code CHAR(7) NOT NULL,         -- course
+                              type_id CHAR(4) NOT NULL,             -- exam type (FINP, FINT, etc.)
+                              status ENUM('Pending','Approved','Rejected') DEFAULT 'Pending',
+                              submitted_date DATE NOT NULL,
+
+                              FOREIGN KEY (stu_id) REFERENCES undergraduate(stu_id) ON DELETE CASCADE,
+                              FOREIGN KEY (course_code) REFERENCES course_unit(course_code) ON DELETE CASCADE,
+                              FOREIGN KEY (type_id) REFERENCES exam_type(type_id) ON DELETE CASCADE,
+
+                              UNIQUE (stu_id, course_code, type_id) -- prevent duplicates
 );
 
 
@@ -182,11 +194,9 @@ CREATE TABLE lecturer_course (
                                  lec_id CHAR(12),
                                  course_code CHAR(7),
                                  PRIMARY KEY (lec_id, course_code),
-
                                  FOREIGN KEY (lec_id) REFERENCES lecturer(lec_id) ON DELETE CASCADE,
                                  FOREIGN KEY (course_code) REFERENCES course_unit(course_code) ON DELETE CASCADE
 );
 
 
 CREATE INDEX idx_enrollment_stu ON enrollment(stu_id);
-CREATE INDEX idx_marks_course ON marks(course_code);
