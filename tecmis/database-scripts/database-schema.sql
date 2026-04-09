@@ -199,4 +199,4 @@ CREATE TABLE lecturer_course (
 );
 
 
-CREATE INDEX idx_enrollment_stu ON enrollment(stu_id);
+
