@@ -1,11 +1,53 @@
 INSERT INTO users (id, f_name, l_name, email, contact_no, hash_pwd, user_type)
 VALUES
-    ('AD001', 'Ravindra', 'Perera', 'ravindra@ruh.ac.lk', '0771234567', 'd4c3b2a1f6e5d4c3b2a1f0e9d8c7b6a5', 'Admin'),
-    ('LEC001', 'Nishantha', 'Fernando', 'nishantha@ruh.ac.lk', '0771111111', 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6', 'Lecturer'),
-    ('TO001', 'Ameer', 'Faisal', 'ameer@ruh.ac.lk', '0711111111', 'f1e2d3c4b5a6f7e8d9c0b1a2f3e4d5c6', 'TechnicalOfficer'),
-    ('TG/2023/1780', 'Saman', 'Perera', 'saman.perera@gmail.com', '0750000001', 'd4c3b2a1f6e5d4c3b2a1f0e9d8c7b6a5', 'Undergraduate'),
-    ('TG/2023/1781', 'Kamal', 'Silva', 'kamal.silva@gmail.com', '0750000002', 'a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0', 'Undergraduate'),
-    ('TG/2022/1785', 'Dinuka', 'Fernando', 'dinuka.fernando@gmail.com', '0750000006', 'e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0', 'Undergraduate');
+-- Admin
+('AD001', 'Ravindra', 'Perera', 'ravindra@ruh.ac.lk', '0771234567', 'd4c3b2a1f6e5d4c3b2a1f0e9d8c7b6a5', 'Admin'),
+
+-- Lecturers
+('LEC001', 'Nishantha', 'Fernando', 'nishantha@ruh.ac.lk', '0771111111', 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6', 'Lecturer'),
+('LEC002', 'Chamila', 'Wijesinghe', 'chamila@ruh.ac.lk', '0772222222', 'b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6', 'Lecturer'),
+('LEC003', 'Kavindu', 'Jayasinghe', 'kavindu@ruh.ac.lk', '0773333333', 'c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6', 'Lecturer'),
+('LEC004', 'Dilani', 'Senanayake', 'dilani@ruh.ac.lk', '0774444444', 'd1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6', 'Lecturer'),
+('LEC005', 'Roshan', 'Kumarasinghe', 'roshan@ruh.ac.lk', '0775555555', 'e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6', 'Lecturer'),
+('LEC006', 'Nadeesha', 'De Silva', 'nadeesha@ruh.ac.lk', '0776666666', 'f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6', 'Lecturer'),
+('LEC007', 'Chamika', 'Jayawardena', 'chamika@ruh.ac.lk', '0777777777', 'a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7', 'Lecturer'),
+('LEC008', 'Kasun', 'Rajapaksha', 'kasun@ruh.ac.lk', '0778888888', 'b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7', 'Lecturer'),
+
+-- Technical Officers
+('TO001', 'Ameer', 'Faisal', 'ameer@ruh.ac.lk', '0711111111', 'f1e2d3c4b5a6f7e8d9c0b1a2f3e4d5c6', 'TechnicalOfficer'),
+('TO002', 'Tharindu', 'Gunawardena', 'tharindu@ruh.ac.lk', '0722222222', 'a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7', 'TechnicalOfficer'),
+('TO003', 'Sanduni', 'Abeysekara', 'sanduni@ruh.ac.lk', '0733333333', 'b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7', 'TechnicalOfficer'),
+('TO004', 'Nimal', 'Perera', 'nimal@ruh.ac.lk', '0744444444', 'c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7', 'TechnicalOfficer'),
+
+
+-- Current batch
+('TG/2023/1780', 'Saman', 'Perera', 'saman.perera@gmail.com', '0750000001', 'd4c3b2a1f6e5d4c3b2a1f0e9d8c7b6a5', 'Undergraduate'),
+('TG/2023/1781', 'Kamal', 'Silva', 'kamal.silva@gmail.com', '0750000002', 'a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0', 'Undergraduate'),
+('TG/2023/1782', 'Nadeesha', 'Fernando', 'nadeesha.fernando@gmail.com', '0750000003', 'b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0', 'Undergraduate'),
+('TG/2023/1783', 'Ishara', 'Perera', 'ishara.perera@gmail.com', '0750000004', 'c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0', 'Undergraduate'),
+('TG/2023/1784', 'Tharushi', 'Silva', 'tharushi.silva@gmail.com', '0750000005', 'd5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0', 'Undergraduate'),
+('TG/2023/1795', 'Sanduni', 'Perera', 'sanduni.perera@gmail.com', '0750000016', 'c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2', 'Undergraduate'),
+('TG/2023/1796', 'Lahiru', 'Silva', 'lahiru.silva@gmail.com', '0750000017', 'd7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2', 'Undergraduate'),
+('TG/2023/1797', 'Thilini', 'Fernando', 'thilini.fernando@gmail.com', '0750000018', 'e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2', 'Undergraduate'),
+('TG/2023/1798', 'Nuwan', 'Perera', 'nuwan.perera@gmail.com', '0750000019', 'f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2', 'Undergraduate'),
+('TG/2023/1799', 'Gayani', 'Silva', 'gayani.silva@gmail.com', '0750000020', 'a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3', 'Undergraduate');
+
+ 
+
+-- Repeat students from 2022
+('TG/2022/1785', 'Dinuka', 'Fernando', 'dinuka.fernando@gmail.com', '0750000006', 'e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0', 'Undergraduate'),
+('TG/2022/1786', 'Kasun', 'Perera', 'kasun.perera@gmail.com', '0750000007', 'f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0', 'Undergraduate'),
+('TG/2022/1787', 'Malithi', 'Silva', 'malithi.silva@gmail.com', '0750000008', 'a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1', 'Undergraduate'),
+('TG/2022/1788', 'Ravindu', 'Fernando', 'ravindu.fernando@gmail.com', '0750000009', 'b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1', 'Undergraduate'),
+('TG/2022/1789', 'Piumi', 'Perera', 'piumi.perera@gmail.com', '0750000010', 'c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1', 'Undergraduate'),
+
+-- Batch-missed / Suspended 2021
+('TG/2021/1790', 'Supun', 'Silva', 'supun.silva@gmail.com', '0750000011', 'd6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1', 'Undergraduate'),
+('TG/2021/1791', 'Sachini', 'Fernando', 'sachini.fernando@gmail.com', '0750000012', 'e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1', 'Undergraduate'),
+('TG/2021/1792', 'Amila', 'Perera', 'amila.perera@gmail.com', '0750000013', 'f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1', 'Undergraduate'),
+('TG/2021/1793', 'Nimali', 'Silva', 'nimali.silva@gmail.com', '0750000014', 'a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2', 'Undergraduate'),
+('TG/2021/1794', 'Chathura', 'Fernando', 'chathura.fernando@gmail.com', '0750000015', 'b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2', 'Undergraduate');
+
 
 
 
