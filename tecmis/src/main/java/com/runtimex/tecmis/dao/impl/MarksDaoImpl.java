@@ -69,9 +69,9 @@ public class MarksDaoImpl implements MarksDao {
         String sql = "INSERT INTO marks (mark_id, stu_id, course_code, type_id, mark) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, mark.getMarkId());
-            ps.setString(2, mark.getStuId());
+            ps.setString(2, mark.getStudentId());
             ps.setString(3, mark.getCourseCode());
-            ps.setString(4, mark.getTypeId());
+            ps.setString(4, mark.getExamTypeId());
             ps.setDouble(5, mark.getMark());
             ps.executeUpdate();
         } catch (SQLException e) {
