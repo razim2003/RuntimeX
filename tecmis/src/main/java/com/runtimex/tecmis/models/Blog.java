@@ -1,3 +1,5 @@
+package com.runtimex.tecmis.models;
+
 public class Blog {
 
     private String blogId;
