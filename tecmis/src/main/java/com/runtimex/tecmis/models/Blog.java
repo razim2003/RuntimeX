@@ -1,4 +1,5 @@
 package com.runtimex.tecmis.models;
+
 import java.util.Date;
 
 public class Blog {
