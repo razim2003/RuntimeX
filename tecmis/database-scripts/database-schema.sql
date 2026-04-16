@@ -60,13 +60,30 @@ CREATE TABLE enrollment (
 );
 
 
+--CREATE TABLE exam_type (
+--                         type_id CHAR(4) PRIMARY KEY,
+ --                          type_name VARCHAR(50),
+--                           weight DECIMAL(3,2) NOT NULL CHECK (weight > 0 AND weight <= 1),
+ --                          exam_date DATE NOT NULL
+--);
+
 CREATE TABLE exam_type (
                            type_id CHAR(4) PRIMARY KEY,
-                           type_name VARCHAR(50),
-                           weight DECIMAL(3,2) NOT NULL CHECK (weight > 0 AND weight <= 1),
-                           exam_date DATE NOT NULL
+                           type_name VARCHAR(50) NOT NULL
 );
 
+CREATE TABLE course_exam (
+                             course_code CHAR(7),
+                             type_id CHAR(4),
+                             weight DECIMAL(3,2) NOT NULL CHECK (weight > 0 AND weight <= 1),
+                             exam_date DATE NOT NULL,
+                             exam_name VARCHAR(100),
+
+                             PRIMARY KEY (course_code, type_id),
+
+                             FOREIGN KEY (course_code) REFERENCES course_unit(course_code) ON DELETE CASCADE,
+                             FOREIGN KEY (type_id) REFERENCES exam_type(type_id)
+);
 
 CREATE TABLE marks (
                        mark_id CHAR(12) PRIMARY KEY,
@@ -75,13 +92,13 @@ CREATE TABLE marks (
                        type_id CHAR(4) NOT NULL,
                        mark DECIMAL(5,2) CHECK (mark >= 0 AND mark <= 100),
 
-
                        FOREIGN KEY (stu_id, course_code)
                            REFERENCES enrollment(stu_id, course_code) ON DELETE CASCADE,
 
-                       FOREIGN KEY (type_id) REFERENCES exam_type(type_id),
+                       FOREIGN KEY (course_code, type_id)
+                           REFERENCES course_exam(course_code, type_id),
 
-                       UNIQUE (stu_id, course_code, type_id) -- prevent duplicates
+                       UNIQUE (stu_id, course_code, type_id)
 );
 
 
@@ -120,18 +137,20 @@ CREATE TABLE medical_attendance (
 );
 
 CREATE TABLE exam_medical (
-                              ex_med_ref_no CHAR(12) PRIMARY KEY,   -- unique ID for this exam medical
-                              stu_id CHAR(12) NOT NULL,             -- student
-                              course_code CHAR(7) NOT NULL,         -- course
-                              type_id CHAR(4) NOT NULL,             -- exam type (FINP, FINT, etc.)
+                              ex_med_ref_no CHAR(12) PRIMARY KEY,
+                              stu_id CHAR(12) NOT NULL,
+                              course_code CHAR(7) NOT NULL,
+                              type_id CHAR(4) NOT NULL,
                               status ENUM('Pending','Approved','Rejected') DEFAULT 'Pending',
                               submitted_date DATE NOT NULL,
 
-                              FOREIGN KEY (stu_id) REFERENCES undergraduate(stu_id) ON DELETE CASCADE,
-                              FOREIGN KEY (course_code) REFERENCES course_unit(course_code) ON DELETE CASCADE,
-                              FOREIGN KEY (type_id) REFERENCES exam_type(type_id) ON DELETE CASCADE,
+                              FOREIGN KEY (stu_id, course_code)
+                                  REFERENCES enrollment(stu_id, course_code) ON DELETE CASCADE,
 
-                              UNIQUE (stu_id, course_code, type_id) -- prevent duplicates
+                              FOREIGN KEY (course_code, type_id)
+                                  REFERENCES course_exam(course_code, type_id) ON DELETE CASCADE,
+
+                              UNIQUE (stu_id, course_code, type_id)
 );
 
 
