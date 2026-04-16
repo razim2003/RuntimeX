@@ -1,6 +1,15 @@
 E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Mark.java
+E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\CourseExam.java
+E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\CourseUnit.java
+E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\utils\DatabaseConnection.java
+E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Timetable.java
+E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\MarksDao.java
+E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Blog.java
+E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\impl\MarksDaoImpl.java
+E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Event.java
+E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\TechnicalOfficer.java
 E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\services\interfaces\MarksService.java
 E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\services\interfaces\AttendanceService.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\ExamType.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\MarksDao.java
+E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\ExamMedical.java
+E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Notice.java
 E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\Main.java
