@@ -10,12 +10,12 @@ public class Mark {
     public Mark() {
     }
 
-    public Mark(String markId, double mark, String examTypeId, String courseCode, String studentId) {
+    public Mark(String markId, String studentId, String courseCode, String examTypeId, double mark) {
         this.markId = markId;
-        this.mark = mark;
-        this.examTypeId = examTypeId;
-        this.courseCode = courseCode;
         this.studentId = studentId;
+        this.courseCode = courseCode;
+        this.examTypeId = examTypeId;
+        this.mark = mark;
     }
 
     public String getMarkId() {

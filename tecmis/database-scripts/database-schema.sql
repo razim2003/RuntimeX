@@ -63,7 +63,8 @@ CREATE TABLE enrollment (
 CREATE TABLE exam_type (
                            type_id CHAR(4) PRIMARY KEY,
                            type_name VARCHAR(50),
-                           weight DECIMAL(3,2) NOT NULL CHECK (weight > 0 AND weight <= 1)-- e.g. 0.30, 0.70
+                           weight DECIMAL(3,2) NOT NULL CHECK (weight > 0 AND weight <= 1),
+                           exam_date DATE NOT NULL
 );
 
 
