@@ -18,14 +18,7 @@ public class MarksDaoTest {
     private static Connection conn;
     private static MarksDao dao;
 
-    // -------------------------------------------------------
-    // Test data — uses TG/2023/1781 who is enrolled in all 8
-    // courses but we pick type_ids that have NO seed marks
-    // to avoid UNIQUE constraint collisions.
-    //
-    // Seed data covers: 1781 → ICT2142: ASST, FINT, QU01, QU03
-    // So we use QU02 (NULL in seed = no row inserted) safely.
-    // -------------------------------------------------------
+
     private static final String TEST_STU      = "TG/TST/0001";
     private static final String TEST_COURSE   = "ICT2142";
     private static final String TEST_TYPE     = "QU02";   // no seed row for 1781+ICT2142+QU02
