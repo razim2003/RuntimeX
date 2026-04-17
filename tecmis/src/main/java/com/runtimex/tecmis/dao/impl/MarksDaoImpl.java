@@ -101,9 +101,7 @@ public class MarksDaoImpl implements MarksDao {
         return null;
     }
 
-    // -----------------------------------------
-    // INSERT MARK
-    // -----------------------------------------
+
     @Override
     public void addMark(Mark mark) {
 
@@ -127,9 +125,7 @@ public class MarksDaoImpl implements MarksDao {
         }
     }
 
-    // -----------------------------------------
-    // UPDATE MARK
-    // -----------------------------------------
+
     @Override
     public void updateMark(Mark mark) {
 

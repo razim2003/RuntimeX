@@ -28,7 +28,7 @@ public class MarksDaoTest {
             ce.setCourseCode("CS101");
             ce.setExamTypeId("QU01");
 
-            Mark mark = new Mark("M1", "STU001", ce, 85.0);
+            Mark mark = new Mark("M2", "TG/2023/1755", ce, 85.0);
             dao.addMark(mark);
             System.out.println("Mark inserted ✔");
 
