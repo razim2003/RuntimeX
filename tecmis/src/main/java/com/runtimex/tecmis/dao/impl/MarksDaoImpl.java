@@ -130,24 +130,26 @@ public class MarksDaoImpl implements MarksDao {
     public void updateMark(Mark mark) {
 
         String sql = """
-                UPDATE marks
-                SET mark = ?
-                WHERE mark_id = ?
-        """;
+            UPDATE marks
+            SET mark = ?
+            WHERE mark_id = ?
+    """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setDouble(1, mark.getMark());
             ps.setString(2, mark.getMarkId());
 
-            ps.executeUpdate();
+            int rows = ps.executeUpdate();
+
+            if (rows == 0) {
+                throw new RuntimeException("No mark found with ID: " + mark.getMarkId());
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException("Error updating mark", e);
         }
-    }
-
-    // -----------------------------------------
+    }    // -----------------------------------------
     // DELETE MARK
     // -----------------------------------------
     @Override
