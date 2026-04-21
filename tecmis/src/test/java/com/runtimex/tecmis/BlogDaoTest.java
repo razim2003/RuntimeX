@@ -7,7 +7,6 @@ import org.junit.jupiter.api.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,7 +28,7 @@ public class BlogDaoTest {
                 "1234"
         );
 
-        dao = new BlogDao();
+        dao = new BlogDao(conn);
 
         insertTestUser();
     }
@@ -37,7 +36,7 @@ public class BlogDaoTest {
     static void insertTestUser() throws Exception {
         conn.createStatement().execute("""
             INSERT IGNORE INTO users (id, f_name, l_name, email, contact_no, hash_pwd, user_type)
-            VALUES ('USR_TEST_001', 'Blog', 'User', 'blog@test.com', '0700000000', 'hash', 'Student')
+            VALUES ('USR_TEST_001', 'Blog', 'User', 'blog@test.com', '0700000000', 'hash', 'Undergraduate')
         """);
     }
 
@@ -78,8 +77,7 @@ public class BlogDaoTest {
     void testViewMyBlogs_ReturnsInsertedBlog() {
         dao.createBlog(buildBlog(TEST_BLOG_ID, "Test Blog"));
 
-        List<Blog> list = new ArrayList<>();
-        dao.viewMyBlogs(list, TEST_USER);
+        List<Blog> list = dao.viewMyBlogs(TEST_USER);
 
         assertFalse(list.isEmpty());
         assertTrue(list.stream().anyMatch(b -> b.getBlogId().equals(TEST_BLOG_ID)));
@@ -88,8 +86,7 @@ public class BlogDaoTest {
     @Test
     @Order(3)
     void testViewMyBlogs_InvalidUser_ReturnsEmpty() {
-        List<Blog> list = new ArrayList<>();
-        dao.viewMyBlogs(list, "INVALID_USER");
+        List<Blog> list = dao.viewMyBlogs("INVALID_USER");
 
         assertNotNull(list);
         assertTrue(list.isEmpty());
@@ -105,8 +102,7 @@ public class BlogDaoTest {
         Blog updated = buildBlog(TEST_BLOG_ID, "New Title");
         dao.updateBlog(updated);
 
-        List<Blog> list = new ArrayList<>();
-        dao.viewMyBlogs(list, TEST_USER);
+        List<Blog> list = dao.viewMyBlogs(TEST_USER);
 
         Blog result = list.stream()
                 .filter(b -> b.getBlogId().equals(TEST_BLOG_ID))
@@ -134,8 +130,7 @@ public class BlogDaoTest {
 
         dao.deleteBlog(TEST_BLOG_ID, TEST_USER);
 
-        List<Blog> list = new ArrayList<>();
-        dao.viewMyBlogs(list, TEST_USER);
+        List<Blog> list = dao.viewMyBlogs(TEST_USER);
 
         assertFalse(list.stream().anyMatch(b -> b.getBlogId().equals(TEST_BLOG_ID)));
     }

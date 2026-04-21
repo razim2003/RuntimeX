@@ -25,7 +25,7 @@ public class BlogDao {
             pst.setString(1, blog.getBlogId());
             pst.setString(2, blog.getUserId());
             pst.setString(3, blog.getTitle());
-            pst.setDate(4, blog.getDate());
+            pst.setDate(4, new java.sql.Date(blog.getDate().getTime()));
 
             pst.executeUpdate();
 
@@ -43,7 +43,7 @@ public class BlogDao {
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
 
             pst.setString(1, blog.getTitle());
-            pst.setDate(2, blog.getDate());
+            pst.setDate(2, new java.sql.Date(blog.getDate().getTime()));
             pst.setString(3, blog.getBlogId());
             pst.setString(4, blog.getUserId());
 

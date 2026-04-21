@@ -6,7 +6,6 @@ public class CourseUnit {
     private String title;
     private int credit;
 
-
     public CourseUnit() {
     }
 
