@@ -6,7 +6,7 @@ Java OOP Semester Project
 
 This repository now includes a JavaFX dashboard for the module parts:
 
-- User profile viewing and contact update
+- User profile viewing, contact update, and profile picture path update
 - Attendance management (Theory / Practical)
 - Medical submission and approval workflow
 - Attendance summary with 80% eligibility check
@@ -17,6 +17,10 @@ This repository now includes a JavaFX dashboard for the module parts:
 
 1. Run schema script:
    - `tecmis/database-scripts/database-schema.sql`
+
+- Optional one-time collation standardization on existing DB:
+  - `tecmis/database-scripts/collation-standardize.sql`
+
 2. Run main data seed:
    - `tecmis/database-scripts/data.sql`
 3. Run attendance + medical scenario seed:
@@ -35,6 +39,9 @@ ADD UNIQUE KEY uq_attendance_session (stu_id, course_code, session_date, compone
 
 ALTER TABLE medical
 ADD COLUMN proof_image_path VARCHAR(300) NULL AFTER end_date;
+
+ALTER TABLE users
+ADD COLUMN profile_image_path VARCHAR(300) NULL AFTER contact_no;
 ```
 
 ### Run application
@@ -69,15 +76,16 @@ Role behavior currently implemented:
   - Course/Notice/Timetable cards visible as placeholders for next phase
 - Lecturer:
   - Update own profile (except username/password)
-  - View attendance, medical, and attendance eligibility summary
-  - Other lecturer functions shown as placeholders for next phase
+  - View-only attendance and medical records of undergraduates
+  - View undergraduate eligibility
+  - Materials/marks/undergraduate details/notices cards available as placeholders for next phase
 - Technical Officer:
   - Update own profile (except username/password)
-  - Add and maintain attendance details
+  - Add and fully maintain attendance details (TO-only edit controls)
   - Add and maintain medical details
   - Notice/timetable placeholders visible
 - Undergraduate:
-  - Update own contact details (profile picture support noted as DB-pending)
+  - Update own contact details and profile picture
   - View own attendance
-  - View own medical details
+  - View own medical details (view-only)
   - Other student features shown as placeholders for next phase

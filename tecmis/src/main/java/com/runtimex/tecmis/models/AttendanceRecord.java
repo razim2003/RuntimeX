@@ -7,6 +7,7 @@ public class AttendanceRecord {
     private String sessionDate;
     private String component;
     private String status;
+    private String displayStatus;
     private String medicalRefNo;
     private String medicalStatus;
 
@@ -69,6 +70,14 @@ public class AttendanceRecord {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getDisplayStatus() {
+        return displayStatus == null || displayStatus.isBlank() ? status : displayStatus;
+    }
+
+    public void setDisplayStatus(String displayStatus) {
+        this.displayStatus = displayStatus;
     }
 
     public String getMedicalRefNo() {

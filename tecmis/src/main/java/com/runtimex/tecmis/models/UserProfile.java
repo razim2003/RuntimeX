@@ -6,6 +6,7 @@ public class UserProfile {
     private String lastName;
     private String email;
     private String contactNo;
+    private String profileImagePath;
     private String userType;
     private String status;
 
@@ -14,11 +15,17 @@ public class UserProfile {
 
     public UserProfile(String id, String firstName, String lastName, String email, String contactNo, String userType,
             String status) {
+        this(id, firstName, lastName, email, contactNo, null, userType, status);
+    }
+
+    public UserProfile(String id, String firstName, String lastName, String email, String contactNo,
+            String profileImagePath, String userType, String status) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.contactNo = contactNo;
+        this.profileImagePath = profileImagePath;
         this.userType = userType;
         this.status = status;
     }
@@ -69,6 +76,14 @@ public class UserProfile {
 
     public String getUserType() {
         return userType;
+    }
+
+    public String getProfileImagePath() {
+        return profileImagePath;
+    }
+
+    public void setProfileImagePath(String profileImagePath) {
+        this.profileImagePath = profileImagePath;
     }
 
     public void setUserType(String userType) {

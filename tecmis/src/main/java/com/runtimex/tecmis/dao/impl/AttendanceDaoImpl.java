@@ -58,12 +58,47 @@ public class AttendanceDaoImpl implements AttendanceDao {
     }
 
     @Override
+    public void updateAttendance(AttendanceRecord record) {
+        String sql = """
+                UPDATE attendance
+                SET stu_id = ?, course_code = ?, session_date = ?, component = ?, status = ?
+                WHERE attendance_id = ?
+                """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, record.getStudentId());
+            ps.setString(2, record.getCourseCode());
+            ps.setString(3, record.getSessionDate());
+            ps.setString(4, record.getComponent());
+            ps.setString(5, record.getStatus());
+            ps.setString(6, record.getAttendanceId());
+
+            int rows = ps.executeUpdate();
+            if (rows == 0) {
+                throw new RuntimeException("No attendance found for id: " + record.getAttendanceId());
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error while updating attendance", e);
+        }
+    }
+
+    @Override
     public List<AttendanceRecord> findAttendance(String studentId, String courseCode, String component) {
         List<AttendanceRecord> records = new ArrayList<>();
 
         String sql = """
                 SELECT a.attendance_id, a.stu_id, a.course_code, a.session_date, a.component, a.status,
-                       ma.ref_no, m.status AS medical_status
+                                             ma.ref_no, m.status AS medical_status,
+                                             CASE
+                                                     WHEN a.status = 'Absent' AND EXISTS (
+                                                             SELECT 1
+                                                             FROM medical m2
+                                                             WHERE m2.stu_id = a.stu_id
+                                                                 AND m2.status = 'Approved'
+                                                                 AND a.session_date BETWEEN m2.start_date AND m2.end_date
+                                                     ) THEN 'Medical'
+                                                     ELSE a.status
+                                             END AS display_status
                 FROM attendance a
                 LEFT JOIN medical_attendance ma ON ma.attendance_id = a.attendance_id
                 LEFT JOIN medical m ON m.ref_no = ma.ref_no
@@ -90,6 +125,7 @@ public class AttendanceDaoImpl implements AttendanceDao {
                         rs.getString("session_date"),
                         rs.getString("component"),
                         rs.getString("status"));
+                record.setDisplayStatus(rs.getString("display_status"));
                 record.setMedicalRefNo(rs.getString("ref_no"));
                 record.setMedicalStatus(rs.getString("medical_status"));
                 records.add(record);

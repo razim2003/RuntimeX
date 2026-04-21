@@ -1,7 +1,7 @@
 USE tecmis_java;
 SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
 SET collation_connection = 'utf8mb4_unicode_ci';
-SET @course := _utf8mb4'ICT2132' COLLATE utf8mb4_unicode_ci;
+SET @course := _utf8mb4 'ICT2132' COLLATE utf8mb4_unicode_ci;
 INSERT IGNORE INTO medical (
         ref_no,
         stu_id,
@@ -38,20 +38,20 @@ DROP TEMPORARY TABLE IF EXISTS seq15;
 CREATE TEMPORARY TABLE seq15 (n INT PRIMARY KEY);
 INSERT INTO seq15 (n)
 VALUES (1),
-(2),
-(3),
-(4),
-(5),
-(6),
-(7),
-(8),
-(9),
-(10),
-(11),
-(12),
-(13),
-(14),
-(15);
+    (2),
+    (3),
+    (4),
+    (5),
+    (6),
+    (7),
+    (8),
+    (9),
+    (10),
+    (11),
+    (12),
+    (13),
+    (14),
+    (15);
 INSERT INTO attendance (
         attendance_id,
         stu_id,

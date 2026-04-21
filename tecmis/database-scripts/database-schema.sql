@@ -8,6 +8,7 @@ CREATE TABLE users (
     l_name VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     contact_no VARCHAR(15) NOT NULL,
+    profile_image_path VARCHAR(300) NULL,
     hash_pwd VARCHAR(255) NOT NULL,
     user_type ENUM(
         'Admin',
