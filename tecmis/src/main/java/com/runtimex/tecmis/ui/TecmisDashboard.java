@@ -772,7 +772,9 @@ public class TecmisDashboard {
         updateStatusBtn.setDisable(!canManage);
 
         Button editBtn = new Button("Edit Selected Medical");
-        editBtn.setDisable(!canManage);
+        editBtn.setDisable(!(canManage || canSubmitMedical));
+
+        Button viewPhotoBtn = new Button("View Selected Photo");
 
         Label selectedPhoto = new Label("Selected Photo: -");
         selectedPhoto.setWrapText(true);
@@ -841,6 +843,20 @@ public class TecmisDashboard {
             }
         });
 
+        viewPhotoBtn.setOnAction(e -> {
+            MedicalRecord selected = table.getSelectionModel().getSelectedItem();
+            if (selected == null) {
+                showError("Select a medical record first");
+                return;
+            }
+            String path = selected.getProofImagePath();
+            if (path == null || path.isBlank()) {
+                showError("No photo uploaded for selected medical record");
+                return;
+            }
+            showMedicalPhoto(path);
+        });
+
         editBtn.setOnAction(e -> {
             MedicalRecord selected = table.getSelectionModel().getSelectedItem();
             if (selected == null) {
@@ -850,11 +866,6 @@ public class TecmisDashboard {
 
             if (selfOnly && !currentUser.getId().equals(selected.getStudentId())) {
                 showError("You can edit only your own medical records");
-                return;
-            }
-
-            if (!canManage) {
-                showError("Only Technical Officer can edit medical records");
                 return;
             }
 
@@ -879,14 +890,15 @@ public class TecmisDashboard {
         HBox addBar3 = new HBox(8, new Label("Photo:"), proofPath, uploadBtn, editBtn);
         HBox filterBar = new HBox(8, new Label("Filter:"), filterStudent, refreshBtn);
         HBox updateBar = new HBox(8, new Label("New Status:"), newStatus, updateStatusBtn);
+        HBox photoViewBar = new HBox(8, viewPhotoBtn);
 
         VBox body;
         if (canManage) {
-            body = new VBox(10, filterBar, table, updateBar, selectedPhoto);
+            body = new VBox(10, filterBar, table, updateBar, photoViewBar, selectedPhoto);
         } else if (canSubmitMedical) {
-            body = new VBox(10, addBar1, addBar2, addBar3, filterBar, table);
+            body = new VBox(10, addBar1, addBar2, addBar3, filterBar, table, photoViewBar, selectedPhoto);
         } else {
-            body = new VBox(10, filterBar, table);
+            body = new VBox(10, filterBar, table, photoViewBar, selectedPhoto);
         }
         body.setPadding(new Insets(16));
         page.setCenter(body);
@@ -904,8 +916,34 @@ public class TecmisDashboard {
     }
 
     private String generateMedicalRefNo() {
-        long value = Math.abs(System.currentTimeMillis() % 1_000_000_000L);
-        return String.format("REF%09d", value);
+        // medical.ref_no is CHAR(6), so keep format as REF + 3 chars.
+        long value = Math.abs(System.nanoTime() % 46656L); // 36^3 combinations
+        String suffix = String.format("%3s", Long.toString(value, 36)).replace(' ', '0').toUpperCase();
+        return "REF" + suffix;
+    }
+
+    private void showMedicalPhoto(String path) {
+        try {
+            File file = new File(path);
+            if (!file.exists() || !file.isFile()) {
+                showError("Photo file not found: " + path);
+                return;
+            }
+
+            Image image = new Image(file.toURI().toString());
+            ImageView imageView = new ImageView(image);
+            imageView.setFitWidth(520);
+            imageView.setFitHeight(360);
+            imageView.setPreserveRatio(true);
+
+            Alert photoAlert = new Alert(Alert.AlertType.INFORMATION);
+            photoAlert.setTitle("Medical Photo");
+            photoAlert.setHeaderText("Uploaded Medical Photo");
+            photoAlert.getDialogPane().setContent(imageView);
+            photoAlert.showAndWait();
+        } catch (Exception ex) {
+            showError("Unable to open photo: " + ex.getMessage());
+        }
     }
 
     private void openSummary() {
