@@ -1,5 +1,7 @@
 CREATE DATABASE IF NOT EXISTS tecmis_java CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE tecmis_java;
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
+SET collation_connection = 'utf8mb4_unicode_ci';
 CREATE TABLE users (
     id CHAR(12) PRIMARY KEY,
     f_name VARCHAR(50) NOT NULL,

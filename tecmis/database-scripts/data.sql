@@ -1,3 +1,7 @@
+USE tecmis_java;
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
+SET collation_connection = 'utf8mb4_unicode_ci';
+
 INSERT INTO users (
         id,
         f_name,
