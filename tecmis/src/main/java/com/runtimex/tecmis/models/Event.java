@@ -12,6 +12,22 @@ public class Event {
     private LocalDate date;
     private LocalTime time;
 
+
+    public Event() {
+    }
+
+
+    public Event(String eventId, String userId, String title, String description, LocalDate date, LocalTime time) {
+        this.eventId = eventId;
+        this.userId = userId;
+        this.title = title;
+        this.description = description;
+        this.date = date;
+        this.time = time;
+    }
+
+
+
     public String getEventId() {
         return eventId;
     }
