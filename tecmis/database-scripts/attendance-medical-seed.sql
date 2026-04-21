@@ -1,5 +1,7 @@
 USE tecmis_java;
-SET @course := 'ICT2132';
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
+SET collation_connection = 'utf8mb4_unicode_ci';
+SET @course := _utf8mb4'ICT2132' COLLATE utf8mb4_unicode_ci;
 INSERT IGNORE INTO medical (
         ref_no,
         stu_id,
