@@ -59,11 +59,11 @@ public class UserDaoImpl implements UserDao {
     @Override
     public UserProfile findById(String userId) {
         String sql = """
-                SELECT u.id, u.f_name, u.l_name, u.email, u.contact_no, u.user_type, ug.status
-                FROM users u
-                LEFT JOIN undergraduate ug ON ug.stu_id = u.id
-                WHERE u.id = ?
-                """;
+                SELECT u.id, u.f_name, u.l_name, u.email, u.contact_no, u.profile_image_path, u.user_type, ug.status
+                    FROM users u
+                    LEFT JOIN undergraduate ug ON ug.stu_id = u.id
+                    WHERE u.id = ?
+                    """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, userId);
@@ -79,6 +79,7 @@ public class UserDaoImpl implements UserDao {
                     rs.getString("l_name"),
                     rs.getString("email"),
                     rs.getString("contact_no"),
+                    rs.getString("profile_image_path"),
                     rs.getString("user_type"),
                     rs.getString("status"));
         } catch (SQLException e) {
@@ -91,19 +92,19 @@ public class UserDaoImpl implements UserDao {
         List<UserProfile> users = new ArrayList<>();
 
         String sql = """
-                SELECT u.id, u.f_name, u.l_name, u.email, u.contact_no, u.user_type, ug.status
-                FROM users u
-                LEFT JOIN undergraduate ug ON ug.stu_id = u.id
-                WHERE (? = 'All' OR u.user_type = ?)
-                  AND (
-                        ? = ''
-                        OR u.id LIKE CONCAT('%', ?, '%')
-                        OR u.f_name LIKE CONCAT('%', ?, '%')
-                        OR u.l_name LIKE CONCAT('%', ?, '%')
-                        OR u.email LIKE CONCAT('%', ?, '%')
-                      )
-                ORDER BY u.user_type, u.id
-                """;
+                SELECT u.id, u.f_name, u.l_name, u.email, u.contact_no, u.profile_image_path, u.user_type, ug.status
+                    FROM users u
+                    LEFT JOIN undergraduate ug ON ug.stu_id = u.id
+                    WHERE (? = 'All' OR u.user_type = ?)
+                      AND (
+                            ? = ''
+                            OR u.id LIKE CONCAT('%', ?, '%')
+                            OR u.f_name LIKE CONCAT('%', ?, '%')
+                            OR u.l_name LIKE CONCAT('%', ?, '%')
+                            OR u.email LIKE CONCAT('%', ?, '%')
+                          )
+                    ORDER BY u.user_type, u.id
+                    """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, userType);
@@ -122,6 +123,7 @@ public class UserDaoImpl implements UserDao {
                         rs.getString("l_name"),
                         rs.getString("email"),
                         rs.getString("contact_no"),
+                        rs.getString("profile_image_path"),
                         rs.getString("user_type"),
                         rs.getString("status")));
             }
@@ -140,6 +142,25 @@ public class UserDaoImpl implements UserDao {
             ps.setString(1, email);
             ps.setString(2, contactNo);
             ps.setString(3, userId);
+
+            int updated = ps.executeUpdate();
+            if (updated == 0) {
+                throw new RuntimeException("No user found for ID: " + userId);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error while updating user profile", e);
+        }
+    }
+
+    @Override
+    public void updateMyProfile(String userId, String email, String contactNo, String profileImagePath) {
+        String sql = "UPDATE users SET email = ?, contact_no = ?, profile_image_path = ? WHERE id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ps.setString(2, contactNo);
+            ps.setString(3, profileImagePath == null || profileImagePath.isBlank() ? null : profileImagePath);
+            ps.setString(4, userId);
 
             int updated = ps.executeUpdate();
             if (updated == 0) {

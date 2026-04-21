@@ -218,6 +218,8 @@ public class TecmisDashboard {
         List<FeatureCard> list = new ArrayList<>();
 
         if ("Admin".equals(role)) {
+            list.add(new FeatureCard("🙍", "My Profile", "Update profile picture and contact details",
+                this::openMyProfileEditor));
             list.add(new FeatureCard("👥", "User Profiles", "Create and maintain user profiles",
                     this::openUserManagement));
             list.add(new FeatureCard("📚", "Courses", "Create and maintain course details",
@@ -232,13 +234,19 @@ public class TecmisDashboard {
         if ("Lecturer".equals(role)) {
             list.add(new FeatureCard("🙍", "My Profile", "Update profile except username/password",
                     this::openMyProfileEditor));
+            list.add(new FeatureCard("📘", "Course Materials", "Modify and add materials to courses",
+                    () -> openPlaceholder("Course material management is next phase.")));
             list.add(new FeatureCard("📋", "Attendance View", "See undergraduate attendance and summary",
                     () -> openAttendance(false, false)));
             list.add(new FeatureCard("🩺", "Medical View", "See undergraduate medical records",
                     () -> openMedical(false, false)));
+            list.add(new FeatureCard("🎓", "Undergraduate Details", "See undergraduate details",
+                    () -> openPlaceholder("Undergraduate details module is next phase.")));
             list.add(new FeatureCard("🧮", "Eligibility", "See undergraduate eligibility", this::openSummary));
-            list.add(new FeatureCard("📈", "Marks, Grades, GPA", "View marks, grades and GPA",
-                    () -> openPlaceholder("Marks/Grades/GPA view is next phase.")));
+            list.add(new FeatureCard("📝", "Upload Marks", "Upload marks for all kinds of exams",
+                    () -> openPlaceholder("Marks upload module is next phase.")));
+            list.add(new FeatureCard("📈", "Marks, Grades, GPA", "See undergraduate marks, grades and GPA",
+                    () -> openPlaceholder("Marks, grades and GPA view is next phase.")));
             list.add(new FeatureCard("📢", "Notices", "See notices",
                     () -> openPlaceholder("Notice board is next phase.")));
             return list;
@@ -258,7 +266,7 @@ public class TecmisDashboard {
             return list;
         }
 
-        list.add(new FeatureCard("🙍", "My Profile", "Update contact details and profile view",
+        list.add(new FeatureCard("🙍", "My Profile", "Update only contact details and profile picture",
                 this::openMyProfileEditor));
         list.add(new FeatureCard("📋", "My Attendance", "See your attendance details",
                 () -> openAttendance(false, true)));
@@ -376,33 +384,37 @@ public class TecmisDashboard {
         TextField email = new TextField(me.getEmail());
         TextField contact = new TextField(me.getContactNo());
 
-        if ("Undergraduate".equals(me.getUserType())) {
-            Label pic = new Label("Profile picture upload is UI-ready but DB column is not added yet.");
-            pic.setStyle("-fx-text-fill: #334155;");
-            Button save = new Button("Save Contact Details");
-            save.setOnAction(e -> saveMyProfile(email.getText().trim(), contact.getText().trim()));
-            VBox box = new VBox(10,
-                    new Label("User ID"), id,
-                    new Label("Name"), name,
-                    new Label("Email"), email,
-                    new Label("Contact"), contact,
-                    roleNote,
-                    pic,
-                    save);
-            box.setPadding(new Insets(16));
-            page.setCenter(box);
-            root.getChildren().setAll(page);
-            return;
-        }
+        TextField profileImagePath = new TextField(me.getProfileImagePath() == null ? "" : me.getProfileImagePath());
+        profileImagePath.setPromptText("Profile image path");
+        profileImagePath.setEditable(false);
+
+        Button uploadBtn = new Button("Upload Photo");
+        uploadBtn.setOnAction(e -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Select profile image");
+            chooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.webp"));
+            java.io.File file = chooser.showOpenDialog(root.getScene() == null ? null : root.getScene().getWindow());
+            if (file != null) {
+                profileImagePath.setText(file.getAbsolutePath());
+            }
+        });
+
+        Button clearBtn = new Button("Remove Photo");
+        clearBtn.setOnAction(e -> profileImagePath.clear());
 
         Button save = new Button("Save");
-        save.setOnAction(e -> saveMyProfile(email.getText().trim(), contact.getText().trim()));
+        save.setOnAction(e -> saveMyProfile(email.getText().trim(), contact.getText().trim(),
+                profileImagePath.getText().trim()));
+
+        HBox photoBar = new HBox(8, profileImagePath, uploadBtn, clearBtn);
 
         VBox box = new VBox(10,
                 new Label("User ID"), id,
                 new Label("Name"), name,
                 new Label("Email"), email,
                 new Label("Contact"), contact,
+                new Label("Profile Picture"), photoBar,
                 roleNote,
                 save);
         box.setPadding(new Insets(16));
@@ -410,9 +422,9 @@ public class TecmisDashboard {
         root.getChildren().setAll(page);
     }
 
-    private void saveMyProfile(String email, String contact) {
+    private void saveMyProfile(String email, String contact, String profileImagePath) {
         try {
-            userDao.updateUserContact(currentUser.getId(), email, contact);
+            userDao.updateMyProfile(currentUser.getId(), email, contact, profileImagePath);
             showInfo("Profile updated");
         } catch (Exception ex) {
             showError(ex.getMessage());
@@ -424,9 +436,9 @@ public class TecmisDashboard {
             return "You can update your profile except username and password.";
         }
         if ("Undergraduate".equals(role)) {
-            return "You can update only contact details and profile picture metadata.";
+            return "You can update contact details and profile picture.";
         }
-        return "Admin manages all user profiles.";
+        return "You can update your profile picture and contact details here.";
     }
 
     private void openAttendance(boolean canManage, boolean selfOnly) {
@@ -488,7 +500,7 @@ public class TecmisDashboard {
         TableColumn<AttendanceRecord, String> compCol = new TableColumn<>("Component");
         compCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getComponent()));
         TableColumn<AttendanceRecord, String> statusCol = new TableColumn<>("Status");
-        statusCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getStatus()));
+        statusCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getDisplayStatus()));
 
         table.getColumns().add(idCol);
         table.getColumns().add(stuCol);
@@ -502,6 +514,9 @@ public class TecmisDashboard {
         updateStatus.setValue("Present");
         Button updateBtn = new Button("Update Selected Status");
         updateBtn.setDisable(!canManage || selfOnly);
+
+        Button editBtn = new Button("Edit Selected Attendance");
+        editBtn.setDisable(!canManage || selfOnly);
 
         addBtn.setOnAction(e -> {
             try {
@@ -557,8 +572,44 @@ public class TecmisDashboard {
             }
         });
 
+        editBtn.setOnAction(e -> {
+            AttendanceRecord selected = table.getSelectionModel().getSelectedItem();
+            if (selected == null) {
+                showError("Select an attendance row first");
+                return;
+            }
+
+            try {
+                AttendanceRecord record = new AttendanceRecord(
+                        selected.getAttendanceId(),
+                        studentIdField.getText().trim(),
+                        courseField.getText().trim(),
+                        datePicker.getValue().toString(),
+                        componentBox.getValue(),
+                        statusBox.getValue());
+                attendanceDao.updateAttendance(record);
+                refreshBtn.fire();
+            } catch (Exception ex) {
+                showError(ex.getMessage());
+            }
+        });
+
+        table.getSelectionModel().selectedItemProperty().addListener((obs, oldV, selected) -> {
+            if (selected != null) {
+                attendanceIdField.setText(selected.getAttendanceId());
+                studentIdField.setText(selected.getStudentId());
+                courseField.setText(selected.getCourseCode());
+                if (selected.getSessionDate() != null && !selected.getSessionDate().isBlank()) {
+                    datePicker.setValue(LocalDate.parse(selected.getSessionDate()));
+                }
+                componentBox.setValue(selected.getComponent());
+                statusBox.setValue(selected.getStatus());
+                updateStatus.setValue(selected.getStatus());
+            }
+        });
+
         HBox addBar = new HBox(8, attendanceIdField, studentIdField, courseField, datePicker, componentBox, statusBox,
-                addBtn);
+                addBtn, editBtn);
         HBox filterBar = new HBox(8, new Label("Filter:"), filterStudent, filterCourse, filterComponent, refreshBtn);
         HBox updateBar = new HBox(8, new Label("New Status:"), updateStatus, updateBtn);
 
@@ -585,8 +636,10 @@ public class TecmisDashboard {
             HBox courseBar = new HBox(10, new Label("Course:"), ugCourseSelector, filterComponent, refreshBtn);
             HBox hoursBar = new HBox(10, ugHoursLabel, ugHoursBar);
             body = new VBox(10, courseBar, hoursBar, table);
-        } else {
+        } else if (canManage) {
             body = new VBox(10, addBar, filterBar, table, updateBar);
+        } else {
+            body = new VBox(10, filterBar, table);
         }
         body.setPadding(new Insets(16));
         page.setCenter(body);
@@ -598,12 +651,16 @@ public class TecmisDashboard {
     private void openMedical(boolean canManage, boolean selfOnly) {
         BorderPane page = buildShell("Medical");
 
+        boolean canSubmitMedical = selfOnly;
+
         TextField refField = new TextField();
         refField.setPromptText("Ref No");
+        refField.setText(generateMedicalRefNo());
+        refField.setEditable(false);
 
         TextField studentId = new TextField(selfOnly ? currentUser.getId() : "");
         studentId.setPromptText("Student ID");
-        studentId.setEditable(!selfOnly);
+        studentId.setEditable(false);
 
         TextArea reason = new TextArea();
         reason.setPromptText("Reason");
@@ -631,13 +688,14 @@ public class TecmisDashboard {
         ComboBox<String> statusBox = new ComboBox<>();
         statusBox.getItems().addAll("Pending", "Approved", "Rejected");
         statusBox.setValue("Pending");
+        statusBox.setDisable(true);
 
-        Button addBtn = new Button("Add Medical");
-        addBtn.setDisable(!(canManage || selfOnly));
+        Button addBtn = new Button("Submit Medical");
+        addBtn.setDisable(!canSubmitMedical);
 
         TextField filterStudent = new TextField(selfOnly ? currentUser.getId() : "");
         filterStudent.setPromptText("Filter by Student ID");
-        filterStudent.setEditable(!selfOnly);
+        filterStudent.setEditable(canManage);
 
         Button refreshBtn = new Button("Refresh");
 
@@ -671,7 +729,10 @@ public class TecmisDashboard {
         updateStatusBtn.setDisable(!canManage);
 
         Button editBtn = new Button("Edit Selected Medical");
-        editBtn.setDisable(!(canManage || selfOnly));
+        editBtn.setDisable(!canManage);
+
+        Label selectedPhoto = new Label("Selected Photo: -");
+        selectedPhoto.setWrapText(true);
 
         addBtn.setOnAction(e -> {
             try {
@@ -679,11 +740,16 @@ public class TecmisDashboard {
                         refField.getText().trim(),
                         studentId.getText().trim(),
                         reason.getText().trim(),
-                        statusBox.getValue(),
+                        "Pending",
                         startDate.getValue().toString(),
                         endDate.getValue().toString(),
                         proofPath.getText().trim());
                 medicalDao.addMedical(record);
+                reason.clear();
+                proofPath.clear();
+                startDate.setValue(LocalDate.now());
+                endDate.setValue(LocalDate.now());
+                refField.setText(generateMedicalRefNo());
                 refreshBtn.fire();
             } catch (Exception ex) {
                 showError(ex.getMessage());
@@ -703,6 +769,10 @@ public class TecmisDashboard {
                     endDate.setValue(LocalDate.parse(selected.getEndDate()));
                 }
                 proofPath.setText(selected.getProofImagePath() == null ? "" : selected.getProofImagePath());
+                selectedPhoto.setText("Selected Photo: "
+                        + (selected.getProofImagePath() == null || selected.getProofImagePath().isBlank()
+                                ? "-"
+                                : selected.getProofImagePath()));
             }
         });
 
@@ -740,6 +810,11 @@ public class TecmisDashboard {
                 return;
             }
 
+            if (!canManage) {
+                showError("Only Technical Officer can edit medical records");
+                return;
+            }
+
             try {
                 MedicalRecord updated = new MedicalRecord(
                         selected.getRefNo(),
@@ -762,7 +837,14 @@ public class TecmisDashboard {
         HBox filterBar = new HBox(8, new Label("Filter:"), filterStudent, refreshBtn);
         HBox updateBar = new HBox(8, new Label("New Status:"), newStatus, updateStatusBtn);
 
-        VBox body = new VBox(10, addBar1, addBar2, addBar3, filterBar, table, updateBar);
+        VBox body;
+        if (canManage) {
+            body = new VBox(10, filterBar, table, updateBar, selectedPhoto);
+        } else if (canSubmitMedical) {
+            body = new VBox(10, addBar1, addBar2, addBar3, filterBar, table);
+        } else {
+            body = new VBox(10, filterBar, table);
+        }
         body.setPadding(new Insets(16));
         page.setCenter(body);
 
@@ -776,6 +858,11 @@ public class TecmisDashboard {
             return courseDisplay;
         }
         return courseDisplay.substring(0, idx).trim();
+    }
+
+    private String generateMedicalRefNo() {
+        long value = Math.abs(System.currentTimeMillis() % 1_000_000_000L);
+        return String.format("REF%09d", value);
     }
 
     private void openSummary() {

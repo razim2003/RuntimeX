@@ -11,6 +11,8 @@ public interface AttendanceDao {
 
     void updateAttendanceStatus(String attendanceId, String status);
 
+    void updateAttendance(AttendanceRecord record);
+
     List<AttendanceRecord> findAttendance(String studentId, String courseCode, String component);
 
     List<AttendanceSummary> getAttendanceSummaryByCourse(String courseCode, String component,

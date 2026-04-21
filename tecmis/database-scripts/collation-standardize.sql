@@ -1,12 +1,9 @@
 USE tecmis_java;
-
 -- Standardize session/connection collation first.
 SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
 SET collation_connection = 'utf8mb4_unicode_ci';
-
 -- Standardize database default collation.
 ALTER DATABASE tecmis_java CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
 -- Standardize all text columns/collations table-by-table.
 ALTER TABLE users CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE admin CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -28,13 +25,13 @@ ALTER TABLE notification CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicod
 ALTER TABLE timetable CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE event_cal CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE lecturer_course CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
 -- Quick verification.
-SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
+SELECT DEFAULT_CHARACTER_SET_NAME,
+    DEFAULT_COLLATION_NAME
 FROM information_schema.SCHEMATA
 WHERE SCHEMA_NAME = 'tecmis_java';
-
-SELECT TABLE_NAME, TABLE_COLLATION
+SELECT TABLE_NAME,
+    TABLE_COLLATION
 FROM information_schema.TABLES
 WHERE TABLE_SCHEMA = 'tecmis_java'
 ORDER BY TABLE_NAME;

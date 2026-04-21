@@ -13,4 +13,6 @@ public interface UserDao {
     List<UserProfile> findUsers(String userType, String keyword);
 
     void updateUserContact(String userId, String email, String contactNo);
+
+    void updateMyProfile(String userId, String email, String contactNo, String profileImagePath);
 }
