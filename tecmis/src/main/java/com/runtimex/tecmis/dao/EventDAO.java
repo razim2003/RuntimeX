@@ -14,7 +14,7 @@ public class EventDAO {
         this.connection = connection;
     }
 
-    // 🔹 Add Event
+
     public void addEvent(Event event) {
         String sql = "INSERT INTO event_cal (event_id, user_id, title, description, date, time) VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -35,7 +35,7 @@ public class EventDAO {
         }
     }
 
-    // 🔹 Get Event By ID
+
     public Event getEventById(String id) {
         String sql = "SELECT * FROM event_cal WHERE event_id = ?";
 
@@ -64,7 +64,7 @@ public class EventDAO {
         return null;
     }
 
-    // 🔹 Get All Events
+
     public List<Event> getAllEvents() {
         List<Event> list = new ArrayList<>();
         String sql = "SELECT * FROM event_cal";
@@ -91,7 +91,7 @@ public class EventDAO {
         return list;
     }
 
-    // 🔹 Update Event
+
     public boolean updateEvent(Event event) {
         String sql = "UPDATE event_cal SET title = ?, description = ?, date = ?, time = ? WHERE event_id = ?";
 
@@ -112,7 +112,7 @@ public class EventDAO {
         }
     }
 
-    // 🔹 Delete Event
+
     public boolean deleteEvent(String id) {
         String sql = "DELETE FROM event_cal WHERE event_id = ?";
 
@@ -129,7 +129,7 @@ public class EventDAO {
         }
     }
 
-    // 🔹 Search Events
+
     public List<Event> searchEvents(String keyword) {
         List<Event> list = new ArrayList<>();
         String sql = "SELECT * FROM event_cal WHERE title LIKE ? OR description LIKE ?";
@@ -161,7 +161,7 @@ public class EventDAO {
         return list;
     }
 
-    // 🔹 Check Event Exists
+
     public boolean eventExists(String id) {
         String sql = "SELECT 1 FROM event_cal WHERE event_id = ?";
 
