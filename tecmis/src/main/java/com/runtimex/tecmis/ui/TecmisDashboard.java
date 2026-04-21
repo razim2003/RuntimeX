@@ -224,7 +224,7 @@ public class TecmisDashboard {
                 }
             }
         } catch (Exception ignored) {
-            // Fallback icon is shown below if profile/photo cannot be loaded.
+            // Keep fallback icon on any load failure.
         }
 
         Label fallbackIcon = new Label("👤");
