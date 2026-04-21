@@ -6,18 +6,17 @@ public class CourseUnit {
     private String title;
     private int credit;
 
-    // ✅ Default constructor
+
     public CourseUnit() {
     }
 
-    // ✅ Parameterized constructor (IMPORTANT FIX)
     public CourseUnit(String courseCode, String title, int credit) {
         this.courseCode = courseCode;
         this.title = title;
         this.credit = credit;
     }
 
-    // Getter and Setter for courseCode
+
     public String getCourseCode() {
         return courseCode;
     }
@@ -26,7 +25,7 @@ public class CourseUnit {
         this.courseCode = courseCode;
     }
 
-    // Getter and Setter for title
+
     public String getTitle() {
         return title;
     }
@@ -35,7 +34,7 @@ public class CourseUnit {
         this.title = title;
     }
 
-    // Getter and Setter for credit
+
     public int getCredit() {
         return credit;
     }
