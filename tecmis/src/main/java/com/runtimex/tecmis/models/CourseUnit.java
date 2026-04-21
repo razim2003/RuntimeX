@@ -6,11 +6,9 @@ public class CourseUnit {
     private String title;
     private int credit;
 
-    // ✅ Default constructor
     public CourseUnit() {
     }
 
-    // ✅ Parameterized constructor (IMPORTANT FIX)
     public CourseUnit(String courseCode, String title, int credit) {
         this.courseCode = courseCode;
         this.title = title;

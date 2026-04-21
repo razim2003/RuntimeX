@@ -1,15 +1,32 @@
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Mark.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\CourseExam.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\CourseUnit.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\utils\DatabaseConnection.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Timetable.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\MarksDao.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Blog.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\impl\MarksDaoImpl.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Event.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\TechnicalOfficer.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\services\interfaces\MarksService.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\services\interfaces\AttendanceService.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\ExamMedical.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Notice.java
-E:\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\Main.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\BlogDao.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\CourseExam.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\ui\TecmisDashboard.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\AttendanceDao.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\TimetableDao.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\impl\UserDaoImpl.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Notice.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\NoticeDao.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\UserProfile.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Event.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\MedicalRecord.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\services\interfaces\AttendanceService.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\CourseUnitDAO.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\ExamMedical.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\AttendanceRecord.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\CourseUnit.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\MedicalDao.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\services\interfaces\MarksService.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Timetable.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\Main.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\TechnicalOfficer.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\MarksDao.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\impl\AttendanceDaoImpl.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\impl\MarksDaoImpl.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\AuthUser.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\services\impl\AttendanceServiceImpl.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\utils\DatabaseConnection.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\impl\MedicalDaoImpl.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Mark.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\UserDao.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\AttendanceSummary.java
+D:\java sem project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Blog.java

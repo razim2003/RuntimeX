@@ -1,22 +1,45 @@
 package com.runtimex.tecmis;
 
+import com.runtimex.tecmis.dao.AttendanceDao;
+import com.runtimex.tecmis.dao.MedicalDao;
+import com.runtimex.tecmis.dao.UserDao;
+import com.runtimex.tecmis.dao.impl.AttendanceDaoImpl;
+import com.runtimex.tecmis.dao.impl.MedicalDaoImpl;
+import com.runtimex.tecmis.dao.impl.UserDaoImpl;
+import com.runtimex.tecmis.services.impl.AttendanceServiceImpl;
+import com.runtimex.tecmis.ui.TecmisDashboard;
+import com.runtimex.tecmis.utils.DatabaseConnection;
 import javafx.application.Application;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+
+import java.sql.Connection;
 
 public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        Button btn = new Button("JavaFX is working!");
-        btn.setOnAction(e -> System.out.println("Button clicked!"));
+        Connection connection = DatabaseConnection.getConnection();
 
-        StackPane root = new StackPane(btn);
-        Scene scene = new Scene(root, 400, 200);
+        Parent root;
+        if (connection == null) {
+            BorderPane fallback = new BorderPane(
+                    new Label("Database connection failed. Check DB credentials in DatabaseConnection.java"));
+            root = fallback;
+        } else {
+            UserDao userDao = new UserDaoImpl(connection);
+            AttendanceDao attendanceDao = new AttendanceDaoImpl(connection);
+            MedicalDao medicalDao = new MedicalDaoImpl(connection);
+            AttendanceServiceImpl attendanceService = new AttendanceServiceImpl(attendanceDao);
+            root = new TecmisDashboard(userDao, attendanceDao, medicalDao, attendanceService).build();
+        }
 
-        primaryStage.setTitle("Tecmis JavaFX Test");
+        Scene scene = new Scene(root, 1300, 760);
+
+        primaryStage.setTitle("TecMIS - RuntimeX (User / Attendance / Medical)");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
