@@ -1,6 +1,7 @@
 com\runtimex\tecmis\services\interfaces\MarksService.class
 com\runtimex\tecmis\dao\AttendanceDao.class
 com\runtimex\tecmis\dao\impl\MarksDaoImpl.class
+main\java\com\runtimex\tecmis\dao\EventDAO.class
 com\runtimex\tecmis\dao\BlogDao.class
 com\runtimex\tecmis\services\impl\AttendanceServiceImpl.class
 com\runtimex\tecmis\models\AuthUser.class

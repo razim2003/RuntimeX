@@ -28,6 +28,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -35,8 +37,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -174,6 +178,8 @@ public class TecmisDashboard {
         Label userInfo = new Label(currentUser.getFullName() + "  (" + currentUser.getUserType() + ")");
         userInfo.setStyle("-fx-text-fill: #cbd5e1;");
 
+        StackPane avatar = buildTopBarAvatar();
+
         Region gap = new Region();
         HBox.setHgrow(gap, Priority.ALWAYS);
 
@@ -187,9 +193,44 @@ public class TecmisDashboard {
             showLogin();
         });
 
-        topBar.getChildren().addAll(title, sec, gap, userInfo, homeBtn, logoutBtn);
+        topBar.getChildren().addAll(title, sec, gap, avatar, userInfo, homeBtn, logoutBtn);
         page.setTop(topBar);
         return page;
+    }
+
+    private StackPane buildTopBarAvatar() {
+        StackPane avatar = new StackPane();
+        avatar.setPrefSize(34, 34);
+        avatar.setMinSize(34, 34);
+        avatar.setMaxSize(34, 34);
+        avatar.setStyle("-fx-background-color: #1e293b; -fx-background-radius: 17; -fx-border-color: #64748b;"
+                + "-fx-border-radius: 17; -fx-border-width: 1;");
+
+        try {
+            UserProfile profile = userDao.findById(currentUser.getId());
+            String imagePath = profile == null ? null : profile.getProfileImagePath();
+
+            if (imagePath != null && !imagePath.isBlank()) {
+                File file = new File(imagePath);
+                if (file.exists() && file.isFile()) {
+                    Image image = new Image(file.toURI().toString(), 34, 34, true, true);
+                    ImageView imageView = new ImageView(image);
+                    imageView.setFitWidth(34);
+                    imageView.setFitHeight(34);
+                    imageView.setPreserveRatio(false);
+                    imageView.setClip(new Circle(17, 17, 17));
+                    avatar.getChildren().add(imageView);
+                    return avatar;
+                }
+            }
+        } catch (Exception ignored) {
+            // Fallback icon is shown below if profile/photo cannot be loaded.
+        }
+
+        Label fallbackIcon = new Label("👤");
+        fallbackIcon.setStyle("-fx-text-fill: #cbd5e1; -fx-font-size: 14px;");
+        avatar.getChildren().add(fallbackIcon);
+        return avatar;
     }
 
     private VBox card(String title, String description, Runnable action) {
@@ -502,8 +543,10 @@ public class TecmisDashboard {
         TableColumn<AttendanceRecord, String> statusCol = new TableColumn<>("Status");
         statusCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getDisplayStatus()));
 
-        table.getColumns().add(idCol);
-        table.getColumns().add(stuCol);
+        if (!selfOnly) {
+            table.getColumns().add(idCol);
+            table.getColumns().add(stuCol);
+        }
         table.getColumns().add(courseCol);
         table.getColumns().add(dateCol);
         table.getColumns().add(compCol);
