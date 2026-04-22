@@ -37,6 +37,8 @@ public class TecmisDashboard {
     private final MarksService marksService;
     private final CourseMaterialDao materialDao;
     private final TimetableDao timetableDao;
+    private final com.runtimex.tecmis.dao.CourseUnitDAO courseUnitDAO;
+    private final com.runtimex.tecmis.dao.NoticeDao noticeDao;
 
     private final ObservableList<UserProfile>         userRows         = FXCollections.observableArrayList();
     private final ObservableList<AttendanceRecord>    attendanceRows   = FXCollections.observableArrayList();
@@ -45,6 +47,9 @@ public class TecmisDashboard {
     private final ObservableList<StudentGpaSummary>   gpaRows          = FXCollections.observableArrayList();
     private final ObservableList<CourseMaterial>      materialRows     = FXCollections.observableArrayList();
     private final ObservableList<Timetable>           timetableRows    = FXCollections.observableArrayList();
+    private final ObservableList<CourseUnit>          courseRows       = FXCollections.observableArrayList();
+    private final ObservableList<Notice>              noticeRows       = FXCollections.observableArrayList();
+    private final ObservableList<UserProfile>         ugRows           = FXCollections.observableArrayList();
 
     private final StackPane root = new StackPane();
     private AuthUser currentUser;
@@ -55,14 +60,18 @@ public class TecmisDashboard {
 
     public TecmisDashboard(UserDao userDao, AttendanceDao attendanceDao, MedicalDao medicalDao,
                            MarksDao marksDao, MarksService marksService,
-                           CourseMaterialDao materialDao, TimetableDao timetableDao) {
-        this.userDao      = userDao;
+                           CourseMaterialDao materialDao, TimetableDao timetableDao,
+                           com.runtimex.tecmis.dao.CourseUnitDAO courseUnitDAO,
+                           com.runtimex.tecmis.dao.NoticeDao noticeDao) {
+        this.userDao       = userDao;
         this.attendanceDao = attendanceDao;
-        this.medicalDao   = medicalDao;
-        this.marksDao     = marksDao;
-        this.marksService = marksService;
-        this.materialDao  = materialDao;
-        this.timetableDao = timetableDao;
+        this.medicalDao    = medicalDao;
+        this.marksDao      = marksDao;
+        this.marksService  = marksService;
+        this.materialDao   = materialDao;
+        this.timetableDao  = timetableDao;
+        this.courseUnitDAO = courseUnitDAO;
+        this.noticeDao     = noticeDao;
     }
 
     public Parent build() {
@@ -223,10 +232,8 @@ public class TecmisDashboard {
         if ("Admin".equals(role)) {
             list.add(new FeatureCard("🙍", "My Profile",    "Update profile picture and contact details", this::openMyProfileEditor));
             list.add(new FeatureCard("👥", "User Profiles", "Create and maintain user profiles",           this::openUserManagement));
-            list.add(new FeatureCard("📚", "Courses",       "Create and maintain course details",
-                    () -> openPlaceholder("Course management is planned in next phase.")));
-            list.add(new FeatureCard("📢", "Notices",       "Create and maintain notices",
-                    () -> openPlaceholder("Notice management is planned in next phase.")));
+            list.add(new FeatureCard("📚", "Courses",       "Create and maintain course details",          this::openCourseManagement));
+            list.add(new FeatureCard("📢", "Notices",       "Create and maintain notices",                 this::openNoticeManagement));
             list.add(new FeatureCard("🗓", "Timetables",    "Create and maintain timetables",              this::openAdminTimetable));
             return list;
         }
@@ -236,13 +243,11 @@ public class TecmisDashboard {
             list.add(new FeatureCard("📘", "Course Materials", "Create and modify materials for your courses", this::openLecturerMaterials));
             list.add(new FeatureCard("📋", "Attendance View",  "See undergraduate attendance and summary",     () -> openAttendance(false, false)));
             list.add(new FeatureCard("🩺", "Medical View",     "See undergraduate medical records",            () -> openMedical(false, false)));
-            list.add(new FeatureCard("🎓", "Undergraduate Details", "See undergraduate details",
-                    () -> openPlaceholder("Undergraduate details module is next phase.")));
+            list.add(new FeatureCard("🎓", "Undergraduate Details", "See undergraduate details",               this::openUndergraduateDetails));
             list.add(new FeatureCard("🧮", "Eligibility",      "See undergraduate eligibility",                this::openSummary));
             list.add(new FeatureCard("📝", "Upload Marks",     "Upload marks for all kinds of exams",          this::openMarksUpload));
             list.add(new FeatureCard("📈", "Marks, Grades, GPA", "See undergraduate marks, grades and GPA",   this::openMarksOverview));
-            list.add(new FeatureCard("📢", "Notices",          "See notices",
-                    () -> openPlaceholder("Notice board is next phase.")));
+            list.add(new FeatureCard("📢", "Notices",          "See notices",                                  this::openNoticeBoard));
             return list;
         }
 
@@ -250,8 +255,7 @@ public class TecmisDashboard {
             list.add(new FeatureCard("🙍", "My Profile",          "Update profile except username/password", this::openMyProfileEditor));
             list.add(new FeatureCard("🗂", "Attendance",          "Add and maintain attendance details",     () -> openAttendance(true, false)));
             list.add(new FeatureCard("🩹", "Medical",             "Add and maintain medical details",        () -> openMedical(true, false)));
-            list.add(new FeatureCard("📢", "Notices",             "See notices",
-                    () -> openPlaceholder("Notice board is next phase.")));
+            list.add(new FeatureCard("📢", "Notices",             "See notices",                             this::openNoticeBoard));
             list.add(new FeatureCard("🗓", "Department Timetable","See timetables for your department",      this::openTOTimetable));
             return list;
         }
@@ -263,8 +267,7 @@ public class TecmisDashboard {
         list.add(new FeatureCard("📘", "Course Materials","View materials for your enrolled courses",         this::openUndergraduateMaterials));
         list.add(new FeatureCard("📈", "My Grades & GPA", "See your grades and GPA",                         this::openMarksOverview));
         list.add(new FeatureCard("🗓", "My Timetable",    "See your class timetable",                        this::openUndergraduateTimetable));
-        list.add(new FeatureCard("📢", "Notices",         "See notices",
-                () -> openPlaceholder("Notice board is next phase.")));
+        list.add(new FeatureCard("📢", "Notices",         "See notices",                                     this::openNoticeBoard));
         return list;
     }
 
@@ -881,38 +884,128 @@ public class TecmisDashboard {
 
     private void openUserManagement() {
         BorderPane page = buildShell("User Profiles");
+
+        // ── Filter bar ──
         ComboBox<String> typeFilter = new ComboBox<>();
         typeFilter.getItems().addAll("All","Admin","Lecturer","TechnicalOfficer","Undergraduate");
         typeFilter.setValue("All");
-        TextField keywordField = new TextField(); keywordField.setPromptText("Search by id/name/email"); keywordField.setPrefWidth(260);
-        Button loadBtn = new Button("Load");
+        TextField keywordField = new TextField();
+        keywordField.setPromptText("Search by id / name / email");
+        keywordField.setPrefWidth(240);
+        Button loadBtn = new Button("🔍 Search");
+
+        // ── Table ──
         TableView<UserProfile> table = new TableView<>(userRows);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         TableColumn<UserProfile,String> idCol      = col("ID",      x -> x.getId());
         TableColumn<UserProfile,String> nameCol    = col("Name",    x -> x.getFullName());
         TableColumn<UserProfile,String> emailCol   = col("Email",   x -> x.getEmail());
         TableColumn<UserProfile,String> contactCol = col("Contact", x -> x.getContactNo());
         TableColumn<UserProfile,String> typeCol    = col("Type",    x -> x.getUserType());
-        table.getColumns().addAll(idCol, nameCol, emailCol, contactCol, typeCol);
-        TextField emailEdit = new TextField(); emailEdit.setPromptText("Updated email");
+        TableColumn<UserProfile,String> statusCol  = col("Status",  x -> x.getStatus() == null ? "" : x.getStatus());
+        table.getColumns().addAll(idCol, nameCol, emailCol, contactCol, typeCol, statusCol);
+        table.setPrefHeight(280);
+
+        // ── Edit contact bar ──
+        TextField emailEdit   = new TextField(); emailEdit.setPromptText("Updated email");
         TextField contactEdit = new TextField(); contactEdit.setPromptText("Updated contact");
-        Button updateBtn = new Button("Update Contact");
-        table.getSelectionModel().selectedItemProperty().addListener((obs,oldV,sel) -> {
-            if (sel != null) { emailEdit.setText(sel.getEmail()); contactEdit.setText(sel.getContactNo()); }
+        Button    updateBtn   = new Button("💾 Update Contact");
+        Button    deleteBtn   = new Button("🗑 Delete User");
+        deleteBtn.setStyle("-fx-background-color: #dc2626; -fx-text-fill: white;");
+
+        table.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
+            if (sel != null) {
+                emailEdit.setText(sel.getEmail());
+                contactEdit.setText(sel.getContactNo());
+            }
         });
+
         loadBtn.setOnAction(e -> {
             try { userRows.setAll(userDao.findUsers(typeFilter.getValue(), keywordField.getText().trim())); }
             catch (Exception ex) { showError(ex.getMessage()); }
         });
+
         updateBtn.setOnAction(e -> {
             UserProfile sel = table.getSelectionModel().getSelectedItem();
             if (sel == null) { showError("Select a user first"); return; }
-            try { userDao.updateUserContact(sel.getId(), emailEdit.getText().trim(), contactEdit.getText().trim()); loadBtn.fire(); }
-            catch (Exception ex) { showError(ex.getMessage()); }
+            try {
+                userDao.updateUserContact(sel.getId(), emailEdit.getText().trim(), contactEdit.getText().trim());
+                showInfo("Contact updated successfully");
+                loadBtn.fire();
+            } catch (Exception ex) { showError(ex.getMessage()); }
         });
-        HBox filters   = new HBox(8, new Label("Type:"), typeFilter, keywordField, loadBtn);
-        HBox updateBar = new HBox(8, new Label("Email:"), emailEdit, new Label("Contact:"), contactEdit, updateBtn);
-        VBox layout    = new VBox(10, filters, table, updateBar); layout.setPadding(new Insets(14));
-        page.setCenter(layout);
+
+        deleteBtn.setOnAction(e -> {
+            UserProfile sel = table.getSelectionModel().getSelectedItem();
+            if (sel == null) { showError("Select a user first"); return; }
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                    "Delete user " + sel.getId() + " – " + sel.getFullName() + "?\nThis cannot be undone.",
+                    ButtonType.YES, ButtonType.NO);
+            confirm.setTitle("Confirm Delete");
+            confirm.showAndWait().ifPresent(bt -> {
+                if (bt == ButtonType.YES) {
+                    try { userDao.deleteUser(sel.getId()); showInfo("User deleted."); loadBtn.fire(); }
+                    catch (Exception ex) { showError(ex.getMessage()); }
+                }
+            });
+        });
+
+        // ── Create User form ──
+        Label createHeading = new Label("➕ Create New User");
+        createHeading.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+
+        TextField newId        = new TextField(); newId.setPromptText("User ID  (e.g. LEC005)");
+        TextField newFirst     = new TextField(); newFirst.setPromptText("First Name");
+        TextField newLast      = new TextField(); newLast.setPromptText("Last Name");
+        TextField newEmail     = new TextField(); newEmail.setPromptText("Email");
+        TextField newContact   = new TextField(); newContact.setPromptText("Contact No");
+        PasswordField newPwd   = new PasswordField(); newPwd.setPromptText("Password");
+        ComboBox<String> newType = new ComboBox<>();
+        newType.getItems().addAll("Admin","Lecturer","TechnicalOfficer","Undergraduate");
+        newType.setPromptText("User Type");
+        Button createBtn = new Button("✅ Create User");
+        createBtn.setStyle("-fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-weight: bold;");
+
+        GridPane createForm = new GridPane();
+        createForm.setHgap(8); createForm.setVgap(6);
+        createForm.setPadding(new Insets(10, 0, 0, 0));
+        createForm.addRow(0, new Label("ID:"), newId, new Label("First Name:"), newFirst);
+        createForm.addRow(1, new Label("Last Name:"), newLast, new Label("Email:"), newEmail);
+        createForm.addRow(2, new Label("Contact:"), newContact, new Label("Password:"), newPwd);
+        createForm.addRow(3, new Label("Type:"), newType, createBtn);
+
+        createBtn.setOnAction(e -> {
+            String id   = newId.getText().trim();
+            String fn   = newFirst.getText().trim();
+            String ln   = newLast.getText().trim();
+            String em   = newEmail.getText().trim();
+            String cn   = newContact.getText().trim();
+            String pw   = newPwd.getText();
+            String tp   = newType.getValue();
+            if (id.isEmpty() || fn.isEmpty() || ln.isEmpty() || em.isEmpty() || cn.isEmpty() || pw.isEmpty() || tp == null) {
+                showError("All fields are required to create a user.");
+                return;
+            }
+            try {
+                userDao.createUser(id, fn, ln, em, cn, pw, tp);
+                showInfo("User " + id + " created successfully.");
+                newId.clear(); newFirst.clear(); newLast.clear();
+                newEmail.clear(); newContact.clear(); newPwd.clear(); newType.setValue(null);
+                loadBtn.fire();
+            } catch (Exception ex) { showError(ex.getMessage()); }
+        });
+
+        // ── Layout ──
+        HBox filterBar  = new HBox(8, new Label("Type:"), typeFilter, keywordField, loadBtn);
+        filterBar.setAlignment(Pos.CENTER_LEFT);
+        HBox editBar    = new HBox(8, new Label("Email:"), emailEdit, new Label("Contact:"), contactEdit, updateBtn, deleteBtn);
+        editBar.setAlignment(Pos.CENTER_LEFT);
+
+        Separator sep = new Separator();
+
+        VBox layout = new VBox(10, filterBar, table, editBar, sep, createHeading, createForm);
+        layout.setPadding(new Insets(14));
+        page.setCenter(new ScrollPane(layout));
         root.getChildren().setAll(page);
         loadBtn.fire();
     }
@@ -1315,6 +1408,529 @@ public class TecmisDashboard {
         HBox controls = new HBox(8, new Label("Course:"), courseBox, studentFilter, includeMedical, loadBtn);
         VBox body     = new VBox(10, controls, table); body.setPadding(new Insets(16));
         page.setCenter(body); root.getChildren().setAll(page); loadBtn.fire();
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
+    // ── COURSE MANAGEMENT (Admin) ─────────────────────────────────────────
+    // ═════════════════════════════════════════════════════════════════════
+
+    private void openCourseManagement() {
+        BorderPane page = buildShell("Course Management");
+
+        // ── Search bar ──
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search by code or title…");
+        searchField.setPrefWidth(260);
+        Button searchBtn = new Button("🔍 Search");
+        Button loadAllBtn = new Button("Load All");
+
+        // ── Table ──
+        TableView<CourseUnit> table = new TableView<>(courseRows);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        TableColumn<CourseUnit,String> codeCol   = col("Course Code", c -> c.getCourseCode());
+        TableColumn<CourseUnit,String> titleCol  = col("Title",       c -> c.getTitle());
+        TableColumn<CourseUnit,String> creditCol = col("Credits",     c -> String.valueOf(c.getCredit()));
+        table.getColumns().addAll(codeCol, titleCol, creditCol);
+        table.setPrefHeight(280);
+
+        // ── Edit bar ──
+        TextField editTitle  = new TextField(); editTitle.setPromptText("Title");
+        TextField editCredit = new TextField(); editCredit.setPromptText("Credits");
+        Button    updateBtn  = new Button("💾 Update");
+        Button    deleteBtn  = new Button("🗑 Delete");
+        deleteBtn.setStyle("-fx-background-color: #dc2626; -fx-text-fill: white;");
+
+        table.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
+            if (sel != null) {
+                editTitle.setText(sel.getTitle());
+                editCredit.setText(String.valueOf(sel.getCredit()));
+            }
+        });
+
+        Runnable reloadAll = () -> {
+            try { courseRows.setAll(courseUnitDAO.getAllCourses()); }
+            catch (Exception ex) { showError(ex.getMessage()); }
+        };
+
+        loadAllBtn.setOnAction(e -> reloadAll.run());
+        searchBtn.setOnAction(e -> {
+            String kw = searchField.getText().trim();
+            try {
+                if (kw.isEmpty()) reloadAll.run();
+                else courseRows.setAll(courseUnitDAO.searchCourses(kw));
+            } catch (Exception ex) { showError(ex.getMessage()); }
+        });
+
+        updateBtn.setOnAction(e -> {
+            CourseUnit sel = table.getSelectionModel().getSelectedItem();
+            if (sel == null) { showError("Select a course first"); return; }
+            String title = editTitle.getText().trim();
+            String creditStr = editCredit.getText().trim();
+            if (title.isEmpty() || creditStr.isEmpty()) { showError("Title and credits are required"); return; }
+            int credits;
+            try { credits = Integer.parseInt(creditStr); } catch (NumberFormatException ex) { showError("Credits must be a number"); return; }
+            // CourseUnitDAO has no updateCourse – build it inline via direct add (replace)
+            try {
+                courseUnitDAO.deleteCourse(sel.getCourseCode());
+                CourseUnit updated = new CourseUnit(sel.getCourseCode(), title, credits);
+                courseUnitDAO.addCourse(updated);
+                showInfo("Course updated.");
+                reloadAll.run();
+            } catch (Exception ex) { showError(ex.getMessage()); }
+        });
+
+        deleteBtn.setOnAction(e -> {
+            CourseUnit sel = table.getSelectionModel().getSelectedItem();
+            if (sel == null) { showError("Select a course first"); return; }
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                    "Delete course " + sel.getCourseCode() + " – " + sel.getTitle() + "?",
+                    ButtonType.YES, ButtonType.NO);
+            confirm.setTitle("Confirm Delete");
+            confirm.showAndWait().ifPresent(bt -> {
+                if (bt == ButtonType.YES) {
+                    try { courseUnitDAO.deleteCourse(sel.getCourseCode()); showInfo("Course deleted."); reloadAll.run(); }
+                    catch (Exception ex) { showError(ex.getMessage()); }
+                }
+            });
+        });
+
+        // ── Create form ──
+        Label createHeading = new Label("➕ Add New Course");
+        createHeading.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+        TextField newCode   = new TextField(); newCode.setPromptText("Course Code (e.g. CS1234)");
+        TextField newTitle  = new TextField(); newTitle.setPromptText("Course Title");
+        TextField newCredit = new TextField(); newCredit.setPromptText("Credits");
+        Button    addBtn    = new Button("✅ Add Course");
+        addBtn.setStyle("-fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-weight: bold;");
+
+        addBtn.setOnAction(e -> {
+            String code   = newCode.getText().trim();
+            String title  = newTitle.getText().trim();
+            String credStr = newCredit.getText().trim();
+            if (code.isEmpty() || title.isEmpty() || credStr.isEmpty()) { showError("All fields required"); return; }
+            int cred;
+            try { cred = Integer.parseInt(credStr); } catch (NumberFormatException ex) { showError("Credits must be a number"); return; }
+            if (courseUnitDAO.courseExists(code)) { showError("Course code already exists: " + code); return; }
+            try {
+                courseUnitDAO.addCourse(new CourseUnit(code, title, cred));
+                showInfo("Course added: " + code);
+                newCode.clear(); newTitle.clear(); newCredit.clear();
+                reloadAll.run();
+            } catch (Exception ex) { showError(ex.getMessage()); }
+        });
+
+        HBox searchBar = new HBox(8, searchField, searchBtn, loadAllBtn);
+        searchBar.setAlignment(Pos.CENTER_LEFT);
+        HBox editBar   = new HBox(8, new Label("Title:"), editTitle, new Label("Credits:"), editCredit, updateBtn, deleteBtn);
+        editBar.setAlignment(Pos.CENTER_LEFT);
+        HBox addBar    = new HBox(8, new Label("Code:"), newCode, new Label("Title:"), newTitle, new Label("Credits:"), newCredit, addBtn);
+        addBar.setAlignment(Pos.CENTER_LEFT);
+
+        VBox layout = new VBox(10, searchBar, table, editBar, new Separator(), createHeading, addBar);
+        layout.setPadding(new Insets(14));
+        page.setCenter(new ScrollPane(layout));
+        root.getChildren().setAll(page);
+        reloadAll.run();
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
+    // ── NOTICE MANAGEMENT (Admin) ─────────────────────────────────────────
+    // ═════════════════════════════════════════════════════════════════════
+
+    /** Shared folder where notice attachments are stored (same machine). */
+    private static final java.nio.file.Path NOTICE_STORE =
+            java.nio.file.Paths.get(System.getProperty("user.home"), "tecmis_notices");
+
+    private java.nio.file.Path noticeStore() {
+        try { java.nio.file.Files.createDirectories(NOTICE_STORE); } catch (Exception ignored) {}
+        return NOTICE_STORE;
+    }
+
+    /** Copies the chosen file into the notice store and returns the stored path. */
+    private String copyNoticeFile(java.io.File src, String noticeId) throws java.io.IOException {
+        String ext   = src.getName().contains(".") ? src.getName().substring(src.getName().lastIndexOf('.')) : "";
+        String name  = noticeId + ext;
+        java.nio.file.Path dest = noticeStore().resolve(name);
+        java.nio.file.Files.copy(src.toPath(), dest, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        return dest.toString();
+    }
+
+    private void openNoticeManagement() {
+        BorderPane page = buildShell("Notice Management");
+
+        // ── search bar ──
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search by title…"); searchField.setPrefWidth(260);
+        Button searchBtn  = new Button("🔍 Search");
+        Button loadAllBtn = new Button("Load All");
+
+        // ── table ──
+        TableView<Notice> table = new TableView<>(noticeRows);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setPrefHeight(220);
+        TableColumn<Notice,String> idCol    = col("Notice ID", n -> n.getNoticeId());
+        TableColumn<Notice,String> titleCol = col("Title",     n -> n.getTitle());
+        TableColumn<Notice,String> dateCol  = col("Date",      n -> n.getDate() == null ? "" : n.getDate().toString());
+        TableColumn<Notice,String> fileCol  = col("Attachment", n -> n.hasFile() ? "📎 " + n.getFileType().toUpperCase() : "—");
+        table.getColumns().addAll(idCol, titleCol, dateCol, fileCol);
+
+        // ── edit section ──
+        Label editHeading = new Label("✏️  Edit Selected Notice");
+        editHeading.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+
+        TextField editTitle      = new TextField(); editTitle.setPromptText("Title");
+        Label     editFileLabel  = new Label("No file attached");
+        editFileLabel.setStyle("-fx-text-fill: #475569;");
+        Button    editBrowseBtn  = new Button("📂 Replace File…");
+        Button    editClearFile  = new Button("✖ Remove File");
+        final java.io.File[] editChosenFile = {null};
+        final boolean[]      editFileClear  = {false};
+
+        editBrowseBtn.setOnAction(e -> {
+            FileChooser fc = new FileChooser();
+            fc.setTitle("Select attachment (PDF or PNG)");
+            fc.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("PDF files", "*.pdf"),
+                    new FileChooser.ExtensionFilter("PNG images", "*.png"));
+            java.io.File f = fc.showOpenDialog(root.getScene() == null ? null : root.getScene().getWindow());
+            if (f != null) {
+                editChosenFile[0] = f;
+                editFileClear[0]  = false;
+                editFileLabel.setText("New: " + f.getName());
+            }
+        });
+        editClearFile.setOnAction(e -> {
+            editChosenFile[0] = null;
+            editFileClear[0]  = true;
+            editFileLabel.setText("File will be removed on save");
+        });
+
+        Button updateBtn = new Button("💾 Save Changes");
+        Button deleteBtn = new Button("🗑 Delete Notice");
+        deleteBtn.setStyle("-fx-background-color: #dc2626; -fx-text-fill: white;");
+
+        // populate edit fields when row selected
+        table.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
+            editChosenFile[0] = null;
+            editFileClear[0]  = false;
+            if (sel != null) {
+                editTitle.setText(sel.getTitle());
+                editFileLabel.setText(sel.hasFile()
+                        ? "Current: " + new java.io.File(sel.getFilePath()).getName()
+                        : "No file attached");
+            } else {
+                editTitle.clear();
+                editFileLabel.setText("No file attached");
+            }
+        });
+
+        Runnable reloadAll = () -> {
+            try { noticeRows.setAll(noticeDao.getAllNotices()); }
+            catch (Exception ex) { showError(ex.getMessage()); }
+        };
+
+        loadAllBtn.setOnAction(e -> reloadAll.run());
+        searchBtn.setOnAction(e -> {
+            String kw = searchField.getText().trim();
+            try { noticeRows.setAll(kw.isEmpty() ? noticeDao.getAllNotices() : noticeDao.searchNotices(kw)); }
+            catch (Exception ex) { showError(ex.getMessage()); }
+        });
+
+        updateBtn.setOnAction(e -> {
+            Notice sel = table.getSelectionModel().getSelectedItem();
+            if (sel == null) { showError("Select a notice to edit."); return; }
+            String title = editTitle.getText().trim();
+            if (title.isEmpty()) { showError("Title cannot be empty."); return; }
+            sel.setTitle(title);
+            // handle file changes
+            if (editFileClear[0]) {
+                sel.setFilePath(null); sel.setFileType(null);
+            } else if (editChosenFile[0] != null) {
+                try {
+                    String stored = copyNoticeFile(editChosenFile[0], sel.getNoticeId());
+                    sel.setFilePath(stored);
+                    sel.setFileType(fileExt(editChosenFile[0].getName()));
+                } catch (Exception ex) { showError("File copy failed: " + ex.getMessage()); return; }
+            }
+            try { noticeDao.updateNotice(sel, currentUser.getId()); showInfo("Notice updated."); reloadAll.run(); }
+            catch (Exception ex) { showError(ex.getMessage()); }
+        });
+
+        deleteBtn.setOnAction(e -> {
+            Notice sel = table.getSelectionModel().getSelectedItem();
+            if (sel == null) { showError("Select a notice to delete."); return; }
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                    "Delete notice \"" + sel.getTitle() + "\"?\nThis cannot be undone.",
+                    ButtonType.YES, ButtonType.NO);
+            confirm.setTitle("Confirm Delete");
+            confirm.showAndWait().ifPresent(bt -> {
+                if (bt == ButtonType.YES) {
+                    try { noticeDao.deleteNotice(sel.getNoticeId(), currentUser.getId()); showInfo("Notice deleted."); reloadAll.run(); }
+                    catch (Exception ex) { showError(ex.getMessage()); }
+                }
+            });
+        });
+
+        // ── create notice form ──
+        Label createHeading = new Label("➕ Create New Notice");
+        createHeading.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+
+        TextField newTitle     = new TextField(); newTitle.setPromptText("Notice title…"); newTitle.setPrefWidth(340);
+        Label     newFileLabel = new Label("No file selected (optional)");
+        newFileLabel.setStyle("-fx-text-fill: #475569;");
+        Button    newBrowseBtn = new Button("📂 Attach File…");
+        final java.io.File[] newChosenFile = {null};
+
+        newBrowseBtn.setOnAction(e -> {
+            FileChooser fc = new FileChooser();
+            fc.setTitle("Attach PDF or PNG");
+            fc.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("PDF files", "*.pdf"),
+                    new FileChooser.ExtensionFilter("PNG images", "*.png"));
+            java.io.File f = fc.showOpenDialog(root.getScene() == null ? null : root.getScene().getWindow());
+            if (f != null) { newChosenFile[0] = f; newFileLabel.setText(f.getName()); }
+        });
+
+        Button addBtn = new Button("✅ Post Notice");
+        addBtn.setStyle("-fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-weight: bold;");
+
+        addBtn.setOnAction(e -> {
+            String title = newTitle.getText().trim();
+            if (title.isEmpty()) { showError("Title is required."); return; }
+            String noticeId = "NOT" + String.format("%09d", Math.abs(System.nanoTime() % 1_000_000_000L));
+            String storedPath = null;
+            String storedType = null;
+            if (newChosenFile[0] != null) {
+                try {
+                    storedPath = copyNoticeFile(newChosenFile[0], noticeId);
+                    storedType = fileExt(newChosenFile[0].getName());
+                } catch (Exception ex) { showError("File copy failed: " + ex.getMessage()); return; }
+            }
+            Notice n = new Notice(noticeId, currentUser.getId(), title, null, storedPath, storedType);
+            try {
+                noticeDao.createNotice(n, currentUser.getId());
+                showInfo("Notice posted" + (storedPath != null ? " with attachment." : "."));
+                newTitle.clear(); newChosenFile[0] = null; newFileLabel.setText("No file selected (optional)");
+                reloadAll.run();
+            } catch (Exception ex) { showError(ex.getMessage()); }
+        });
+
+        // ── layout ──
+        HBox searchBar = new HBox(8, searchField, searchBtn, loadAllBtn);
+        searchBar.setAlignment(Pos.CENTER_LEFT);
+
+        HBox fileEditRow = new HBox(8, editBrowseBtn, editClearFile, editFileLabel);
+        fileEditRow.setAlignment(Pos.CENTER_LEFT);
+        GridPane editForm = new GridPane();
+        editForm.setHgap(10); editForm.setVgap(6);
+        editForm.addRow(0, new Label("Title:"), editTitle);
+        editForm.addRow(1, new Label("File:"), fileEditRow);
+        HBox editBtnRow = new HBox(8, updateBtn, deleteBtn);
+        VBox editSection = new VBox(6, editHeading, editForm, editBtnRow);
+        editSection.setPadding(new Insets(8, 0, 0, 0));
+
+        HBox newFileRow = new HBox(8, newBrowseBtn, newFileLabel);
+        newFileRow.setAlignment(Pos.CENTER_LEFT);
+        GridPane createForm = new GridPane();
+        createForm.setHgap(10); createForm.setVgap(6);
+        createForm.addRow(0, new Label("Title:"), newTitle);
+        createForm.addRow(1, new Label("File:"), newFileRow);
+        createForm.addRow(2, new Label(), addBtn);
+        VBox createSection = new VBox(6, createHeading, createForm);
+        createSection.setPadding(new Insets(8, 0, 0, 0));
+
+        VBox layout = new VBox(10, searchBar, table, new Separator(), editSection, new Separator(), createSection);
+        layout.setPadding(new Insets(14));
+        ScrollPane sp = new ScrollPane(layout);
+        sp.setFitToWidth(true);
+        page.setCenter(sp);
+        root.getChildren().setAll(page);
+        reloadAll.run();
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
+    // ── NOTICE BOARD (Lecturer / TO / Undergraduate – read + download) ────
+    // ═════════════════════════════════════════════════════════════════════
+
+    private void openNoticeBoard() {
+        BorderPane page = buildShell("Notice Board");
+
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search notices…"); searchField.setPrefWidth(240);
+        Button searchBtn  = new Button("🔍 Search");
+        Button refreshBtn = new Button("🔄 Refresh");
+
+        // ── table ──
+        TableView<Notice> table = new TableView<>(noticeRows);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        VBox.setVgrow(table, Priority.ALWAYS);
+        table.setPlaceholder(new Label("No notices available."));
+        TableColumn<Notice,String> idCol    = col("Notice ID", n -> n.getNoticeId());
+        TableColumn<Notice,String> titleCol = col("Title",     n -> n.getTitle());
+        TableColumn<Notice,String> dateCol  = col("Date",      n -> n.getDate() == null ? "" : n.getDate().toString());
+        TableColumn<Notice,String> fileCol  = col("Attachment", n -> n.hasFile() ? "📎 " + n.getFileType().toUpperCase() : "—");
+        table.getColumns().addAll(idCol, titleCol, dateCol, fileCol);
+
+        // ── action buttons ──
+        Button viewBtn     = new Button("👁 View / Open");
+        Button downloadBtn = new Button("⬇ Download");
+        viewBtn.setDisable(true); downloadBtn.setDisable(true);
+
+        table.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
+            boolean hasFile = sel != null && sel.hasFile();
+            viewBtn.setDisable(!hasFile);
+            downloadBtn.setDisable(!hasFile);
+        });
+
+        // Open the file using the system default viewer
+        viewBtn.setOnAction(e -> {
+            Notice sel = table.getSelectionModel().getSelectedItem();
+            if (sel == null || !sel.hasFile()) return;
+            try {
+                java.io.File f = new java.io.File(sel.getFilePath());
+                if (!f.exists()) { showError("Attachment not found on disk:\n" + sel.getFilePath()); return; }
+                if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(f);
+                else showError("Desktop open is not supported on this system.");
+            } catch (Exception ex) { showError("Cannot open file: " + ex.getMessage()); }
+        });
+
+        // Save a copy to a user-chosen location
+        downloadBtn.setOnAction(e -> {
+            Notice sel = table.getSelectionModel().getSelectedItem();
+            if (sel == null || !sel.hasFile()) return;
+            java.io.File src = new java.io.File(sel.getFilePath());
+            if (!src.exists()) { showError("Attachment not found on disk:\n" + sel.getFilePath()); return; }
+            FileChooser fc = new FileChooser();
+            fc.setTitle("Save attachment as…");
+            fc.setInitialFileName(src.getName());
+            if ("pdf".equalsIgnoreCase(sel.getFileType()))
+                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF files", "*.pdf"));
+            else
+                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG images", "*.png"));
+            java.io.File dest = fc.showSaveDialog(root.getScene() == null ? null : root.getScene().getWindow());
+            if (dest != null) {
+                try {
+                    java.nio.file.Files.copy(src.toPath(), dest.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    showInfo("File saved to:\n" + dest.getAbsolutePath());
+                } catch (Exception ex) { showError("Download failed: " + ex.getMessage()); }
+            }
+        });
+
+        Runnable reloadAll = () -> {
+            try { noticeRows.setAll(noticeDao.getAllNotices()); }
+            catch (Exception ex) { showError(ex.getMessage()); }
+        };
+
+        refreshBtn.setOnAction(e -> reloadAll.run());
+        searchBtn.setOnAction(e -> {
+            String kw = searchField.getText().trim();
+            try { noticeRows.setAll(kw.isEmpty() ? noticeDao.getAllNotices() : noticeDao.searchNotices(kw)); }
+            catch (Exception ex) { showError(ex.getMessage()); }
+        });
+
+        HBox filterBar = new HBox(8, searchField, searchBtn, refreshBtn);
+        filterBar.setAlignment(Pos.CENTER_LEFT);
+        HBox actionBar = new HBox(10, viewBtn, downloadBtn);
+        actionBar.setAlignment(Pos.CENTER_LEFT);
+        actionBar.setPadding(new Insets(4, 0, 0, 0));
+
+        VBox layout = new VBox(10, filterBar, table, actionBar);
+        layout.setPadding(new Insets(14));
+        VBox.setVgrow(layout, Priority.ALWAYS);
+        page.setCenter(layout);
+        root.getChildren().setAll(page);
+        reloadAll.run();
+    }
+
+    /** Extracts lowercase extension ("pdf" or "png") from a filename. */
+    private String fileExt(String fileName) {
+        if (fileName == null) return null;
+        int dot = fileName.lastIndexOf('.');
+        return dot >= 0 ? fileName.substring(dot + 1).toLowerCase() : null;
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
+    // ── UNDERGRADUATE DETAILS (Lecturer view) ────────────────────────────
+    // ═════════════════════════════════════════════════════════════════════
+
+    private void openUndergraduateDetails() {
+        BorderPane page = buildShell("Undergraduate Details");
+
+        TextField searchField = new TextField(); searchField.setPromptText("Search by ID or name…"); searchField.setPrefWidth(240);
+        Button searchBtn  = new Button("🔍 Search");
+        Button loadAllBtn = new Button("Load All");
+
+        TableView<UserProfile> table = new TableView<>(ugRows);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        TableColumn<UserProfile,String> idCol      = col("Student ID", u -> u.getId());
+        TableColumn<UserProfile,String> nameCol    = col("Full Name",  u -> u.getFullName());
+        TableColumn<UserProfile,String> emailCol   = col("Email",      u -> u.getEmail());
+        TableColumn<UserProfile,String> contactCol = col("Contact",    u -> u.getContactNo());
+        TableColumn<UserProfile,String> statusCol  = col("Status",     u -> u.getStatus() == null ? "" : u.getStatus());
+        table.getColumns().addAll(idCol, nameCol, emailCol, contactCol, statusCol);
+        table.setPrefHeight(260);
+        table.setPlaceholder(new Label("No undergraduates found."));
+
+        // Detail card shown on row selection
+        Label detailId      = new Label(); detailId.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+        Label detailName    = new Label();
+        Label detailEmail   = new Label();
+        Label detailContact = new Label();
+        Label detailStatus  = new Label();
+
+        VBox detailCard = new VBox(6,
+                new Label("── Selected Undergraduate ──"),
+                hRow("Student ID:", detailId),
+                hRow("Name:", detailName),
+                hRow("Email:", detailEmail),
+                hRow("Contact:", detailContact),
+                hRow("Status:", detailStatus));
+        detailCard.setPadding(new Insets(12));
+        detailCard.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 8; -fx-border-color: #cbd5e1; -fx-border-radius: 8;");
+        detailCard.setVisible(false);
+
+        table.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
+            if (sel != null) {
+                detailId.setText(sel.getId());
+                detailName.setText(sel.getFullName());
+                detailEmail.setText(sel.getEmail());
+                detailContact.setText(sel.getContactNo());
+                detailStatus.setText(sel.getStatus() == null ? "N/A" : sel.getStatus());
+                detailCard.setVisible(true);
+            } else {
+                detailCard.setVisible(false);
+            }
+        });
+
+        Runnable reload = () -> {
+            try { ugRows.setAll(userDao.findUndergraduates("")); }
+            catch (Exception ex) { showError(ex.getMessage()); }
+        };
+
+        loadAllBtn.setOnAction(e -> reload.run());
+        searchBtn.setOnAction(e -> {
+            String kw = searchField.getText().trim();
+            try { ugRows.setAll(userDao.findUndergraduates(kw)); }
+            catch (Exception ex) { showError(ex.getMessage()); }
+        });
+
+        HBox filterBar = new HBox(8, searchField, searchBtn, loadAllBtn);
+        filterBar.setAlignment(Pos.CENTER_LEFT);
+
+        VBox layout = new VBox(12, filterBar, table, detailCard);
+        layout.setPadding(new Insets(14));
+        page.setCenter(new ScrollPane(layout));
+        root.getChildren().setAll(page);
+        reload.run();
+    }
+
+    /** Helper: builds a two-label row for the detail card. */
+    private HBox hRow(String labelText, Label value) {
+        Label lbl = new Label(labelText);
+        lbl.setStyle("-fx-font-weight: bold; -fx-min-width: 90px;");
+        HBox row = new HBox(8, lbl, value);
+        row.setAlignment(Pos.CENTER_LEFT);
+        return row;
     }
 
     private void openPlaceholder(String message) {

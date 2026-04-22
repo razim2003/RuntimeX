@@ -129,6 +129,8 @@ CREATE TABLE notice (
     admin_id CHAR(12) NOT NULL,
     title VARCHAR(255) NOT NULL,
     date DATE NOT NULL,
+    file_path VARCHAR(500) NULL,
+    file_type VARCHAR(10) NULL,
     FOREIGN KEY (admin_id) REFERENCES admin(admin_id)
 );
 CREATE TABLE blog (
