@@ -7,76 +7,43 @@ public class Timetable {
     private String lecturerId;
     private String courseCode;
     private String location;
-    private int level;
-    private String type;
-    private int hours;
-
+    private int    level;
+    private String type;       // Theory | Practical
+    private int    hours;
+    private String dayOfWeek;  // Monday … Sunday  (NEW)
+    private String startTime;  // HH:mm             (NEW)
 
     public Timetable() {}
 
+    // ── getters & setters ──────────────────────────────────────────────
 
+    public String getTimetableId()            { return timetableId; }
+    public void   setTimetableId(String v)    { this.timetableId = v; }
 
-    public String getTimetableId() {
-        return timetableId;
-    }
+    public String getAdminId()                { return adminId; }
+    public void   setAdminId(String v)        { this.adminId = v; }
 
-    public void setTimetableId(String timetableId) {
-        this.timetableId = timetableId;
-    }
+    public String getLecturerId()             { return lecturerId; }
+    public void   setLecturerId(String v)     { this.lecturerId = v; }
 
-    public String getAdminId() {
-        return adminId;
-    }
+    public String getCourseCode()             { return courseCode; }
+    public void   setCourseCode(String v)     { this.courseCode = v; }
 
-    public void setAdminId(String adminId) {
-        this.adminId = adminId;
-    }
+    public String getLocation()               { return location; }
+    public void   setLocation(String v)       { this.location = v; }
 
-    public String getLecturerId() {
-        return lecturerId;
-    }
+    public int    getLevel()                  { return level; }
+    public void   setLevel(int v)             { this.level = v; }
 
-    public void setLecturerId(String lecturerId) {
-        this.lecturerId = lecturerId;
-    }
+    public String getType()                   { return type; }
+    public void   setType(String v)           { this.type = v; }
 
-    public String getCourseCode() {
-        return courseCode;
-    }
+    public int    getHours()                  { return hours; }
+    public void   setHours(int v)             { this.hours = v; }
 
-    public void setCourseCode(String courseCode) {
-        this.courseCode = courseCode;
-    }
+    public String getDayOfWeek()              { return dayOfWeek; }
+    public void   setDayOfWeek(String v)      { this.dayOfWeek = v; }
 
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public int getHours() {
-        return hours;
-    }
-
-    public void setHours(int hours) {
-        this.hours = hours;
-    }
+    public String getStartTime()              { return startTime; }
+    public void   setStartTime(String v)      { this.startTime = v; }
 }

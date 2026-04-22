@@ -22,10 +22,12 @@ com\runtimex\tecmis\dao\impl\MedicalDaoImpl.class
 com\runtimex\tecmis\ui\TecmisDashboard$3.class
 com\runtimex\tecmis\utils\DatabaseConnection.class
 com\runtimex\tecmis\services\impl\MarksServiceImpl.class
+com\runtimex\tecmis\dao\CourseMaterialDao.class
 com\runtimex\tecmis\models\AttendanceSummary.class
 com\runtimex\tecmis\models\UserProfile.class
 com\runtimex\tecmis\ui\TecmisDashboard.class
 com\runtimex\tecmis\dao\TimetableDao.class
+com\runtimex\tecmis\models\CourseMaterial.class
 com\runtimex\tecmis\models\Event.class
 com\runtimex\tecmis\ui\TecmisDashboard$FeatureCard.class
 com\runtimex\tecmis\dao\MedicalDao.class
