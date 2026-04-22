@@ -1,8 +1,10 @@
 package com.runtimex.tecmis;
 
 import com.runtimex.tecmis.dao.AttendanceDao;
+import com.runtimex.tecmis.dao.CourseMaterialDao;
 import com.runtimex.tecmis.dao.MedicalDao;
 import com.runtimex.tecmis.dao.MarksDao;
+import com.runtimex.tecmis.dao.TimetableDao;
 import com.runtimex.tecmis.dao.UserDao;
 import com.runtimex.tecmis.dao.impl.AttendanceDaoImpl;
 import com.runtimex.tecmis.dao.impl.MedicalDaoImpl;
@@ -33,19 +35,24 @@ public class Main extends Application {
                     new Label("Database connection failed. Check DB credentials in DatabaseConnection.java"));
             root = fallback;
         } else {
-            UserDao userDao = new UserDaoImpl(connection);
-            AttendanceDao attendanceDao = new AttendanceDaoImpl(connection);
-            MedicalDao medicalDao = new MedicalDaoImpl(connection);
-                MarksDao marksDao = new MarksDaoImpl(connection);
-                AttendanceServiceImpl attendanceService = new AttendanceServiceImpl(attendanceDao);
-                MarksServiceImpl marksService = new MarksServiceImpl(marksDao, attendanceDao);
-                root = new TecmisDashboard(userDao, attendanceDao, medicalDao, marksDao,
-                    marksService).build();
+            UserDao            userDao         = new UserDaoImpl(connection);
+            AttendanceDao      attendanceDao   = new AttendanceDaoImpl(connection);
+            MedicalDao         medicalDao      = new MedicalDaoImpl(connection);
+            MarksDao           marksDao        = new MarksDaoImpl(connection);
+            CourseMaterialDao  materialDao     = new CourseMaterialDao(connection);   // NEW
+            TimetableDao       timetableDao    = new TimetableDao(connection);        // NEW (updated)
+
+            AttendanceServiceImpl attendanceService = new AttendanceServiceImpl(attendanceDao);
+            MarksServiceImpl      marksService      = new MarksServiceImpl(marksDao, attendanceDao);
+
+            root = new TecmisDashboard(
+                    userDao, attendanceDao, medicalDao, marksDao, marksService,
+                    materialDao, timetableDao                                         // NEW
+            ).build();
         }
 
         Scene scene = new Scene(root, 1300, 760);
-
-        primaryStage.setTitle("TecMIS - RuntimeX (User / Attendance / Medical)");
+        primaryStage.setTitle("TecMIS - RuntimeX");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
