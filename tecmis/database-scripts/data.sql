@@ -340,10 +340,8 @@ VALUES -- TG/2023/1780 (Proper student - enrolled in ALL 8 courses)
     ('TG/2021/1790', 'ICT2142');
 INSERT INTO exam_type (type_id, type_name)
 VALUES ('ASST', 'Assignment'),
-    ('MIDT', 'Midterm Theory'),
-    ('MIDP', 'Midterm Practical'),
-    ('FINT', 'Final Theory'),
-    ('FINP', 'Final Practical'),
+    ('MID', 'Midterm'),
+    ('FIN', 'Final'),
     ('QU01', 'Quiz 01'),
     ('QU02', 'Quiz 02'),
     ('QU03', 'Quiz 03');
@@ -364,10 +362,10 @@ VALUES (
     ),
     (
         'ICT2142',
-        'FINT',
+        'FIN',
         0.70,
         '2026-06-10',
-        'Final Theory Exam'
+        'Final Exam'
     ),
     ('ICT2142', 'QU01', 0.05, '2026-02-10', 'Quiz 1'),
     ('ICT2142', 'QU02', 0.05, '2026-03-05', 'Quiz 2'),
@@ -389,17 +387,17 @@ VALUES (
     ),
     (
         'ICT2122',
-        'MIDT',
+        'MID',
         0.10,
         '2026-04-05',
-        'Midterm Theory'
+        'Midterm'
     ),
     (
         'ICT2122',
-        'FINT',
+        'FIN',
         0.70,
         '2026-06-15',
-        'Final Theory'
+        'Final Exam'
     ),
     ('ICT2122', 'QU01', 0.05, '2026-02-20', 'Quiz 1'),
     ('ICT2122', 'QU02', 0.05, '2026-03-25', 'Quiz 2'),
@@ -415,17 +413,17 @@ INSERT INTO course_exam (
 VALUES ('ICT2132', 'ASST', 0.20, '2026-04-10', 'Project'),
     (
         'ICT2132',
-        'MIDP',
+        'MID',
         0.10,
         '2026-04-20',
-        'Midterm Practical'
+        'Midterm'
     ),
     (
         'ICT2132',
-        'FINP',
+        'FIN',
         0.60,
         '2026-06-20',
-        'Final Practical'
+        'Final Exam'
     ),
     ('ICT2132', 'QU01', 0.05, '2026-02-15', 'Quiz 1'),
     ('ICT2132', 'QU02', 0.05, '2026-03-15', 'Quiz 2'),
@@ -447,17 +445,17 @@ VALUES (
     ),
     (
         'ICT2152',
-        'MIDT',
+        'MID',
         0.10,
         '2026-04-15',
-        'Midterm Theory'
+        'Midterm'
     ),
     (
         'ICT2152',
-        'FINT',
+        'FIN',
         0.60,
         '2026-06-18',
-        'Final Theory'
+        'Final Exam'
     ),
     ('ICT2152', 'QU01', 0.05, '2026-02-12', 'Quiz 1'),
     ('ICT2152', 'QU02', 0.05, '2026-03-12', 'Quiz 2'),
@@ -479,14 +477,14 @@ VALUES (
     ),
     (
         'ENG2122',
-        'MIDT',
+        'MID',
         0.10,
         '2026-04-12',
-        'Midterm Exam'
+        'Midterm'
     ),
     (
         'ENG2122',
-        'FINT',
+        'FIN',
         0.60,
         '2026-06-14',
         'Final Exam'
@@ -511,17 +509,17 @@ VALUES (
     ),
     (
         'ICT2113',
-        'MIDP',
+        'MID',
         0.20,
         '2026-04-10',
-        'Midterm Practical'
+        'Midterm'
     ),
     (
         'ICT2113',
-        'FINT',
+        'FIN',
         0.60,
         '2026-06-22',
-        'Final Theory'
+        'Final Exam'
     ),
     ('ICT2113', 'QU01', 0.05, '2026-02-25', 'Quiz 1'),
     ('ICT2113', 'QU02', 0.05, '2026-03-20', 'Quiz 2'),
@@ -543,14 +541,14 @@ VALUES (
     ),
     (
         'TCS2112',
-        'MIDT',
+        'MID',
         0.10,
         '2026-04-18',
-        'Midterm Exam'
+        'Midterm'
     ),
     (
         'TCS2112',
-        'FINT',
+        'FIN',
         0.70,
         '2026-06-20',
         'Final Exam'
@@ -575,17 +573,17 @@ VALUES (
     ),
     (
         'TCS2122',
-        'MIDT',
+        'MID',
         0.20,
         '2026-04-22',
-        'Midterm Assessment'
+        'Midterm'
     ),
     (
         'TCS2122',
-        'FINT',
+        'FIN',
         0.60,
         '2026-06-23',
-        'Final Assessment'
+        'Final Exam'
     ),
     ('TCS2122', 'QU01', 0.05, '2026-02-28', 'Quiz 1'),
     ('TCS2122', 'QU02', 0.05, '2026-03-28', 'Quiz 2'),
@@ -603,7 +601,7 @@ VALUES -- ICT2142
         'MK000000002',
         'TG/2023/1780',
         'ICT2142',
-        'FINT',
+        'FIN',
         75.00
     ),
     (
@@ -639,14 +637,14 @@ VALUES -- ICT2142
         'MK000000007',
         'TG/2023/1780',
         'ICT2122',
-        'MIDT',
+        'MID',
         72.00
     ),
     (
         'MK000000008',
         'TG/2023/1780',
         'ICT2122',
-        'FINT',
+        'FIN',
         79.00
     ),
     (
@@ -682,14 +680,14 @@ VALUES -- ICT2142
         'MK000000013',
         'TG/2023/1780',
         'ICT2132',
-        'MIDP',
+        'MID',
         84.00
     ),
     (
         'MK000000014',
         'TG/2023/1780',
         'ICT2132',
-        'FINP',
+        'FIN',
         86.00
     ),
     (
@@ -725,14 +723,14 @@ VALUES -- ICT2142
         'MK000000019',
         'TG/2023/1780',
         'ICT2152',
-        'MIDT',
+        'MID',
         68.00
     ),
     (
         'MK000000020',
         'TG/2023/1780',
         'ICT2152',
-        'FINT',
+        'FIN',
         74.00
     ),
     (
@@ -768,14 +766,14 @@ VALUES -- ICT2142
         'MK000000025',
         'TG/2023/1780',
         'ENG2122',
-        'MIDT',
+        'MID',
         78.00
     ),
     (
         'MK000000026',
         'TG/2023/1780',
         'ENG2122',
-        'FINT',
+        'FIN',
         80.00
     ),
     (
@@ -811,14 +809,14 @@ VALUES -- ICT2142
         'MK000000031',
         'TG/2023/1780',
         'ICT2113',
-        'MIDP',
+        'MID',
         71.00
     ),
     (
         'MK000000032',
         'TG/2023/1780',
         'ICT2113',
-        'FINT',
+        'FIN',
         73.00
     ),
     (
@@ -854,14 +852,14 @@ VALUES -- ICT2142
         'MK000000037',
         'TG/2023/1780',
         'TCS2112',
-        'MIDT',
+        'MID',
         75.00
     ),
     (
         'MK000000038',
         'TG/2023/1780',
         'TCS2112',
-        'FINT',
+        'FIN',
         78.00
     ),
     (
@@ -897,14 +895,14 @@ VALUES -- ICT2142
         'MK000000043',
         'TG/2023/1780',
         'TCS2122',
-        'MIDT',
+        'MID',
         76.00
     ),
     (
         'MK000000044',
         'TG/2023/1780',
         'TCS2122',
-        'FINT',
+        'FIN',
         79.00
     ),
     (
@@ -943,7 +941,7 @@ VALUES -- ICT2142
         'MK000000049',
         'TG/2023/1781',
         'ICT2142',
-        'FINT',
+        'FIN',
         NULL
     ),
     -- missed final
@@ -981,14 +979,14 @@ VALUES -- ICT2142
         'MK000000054',
         'TG/2023/1781',
         'ICT2122',
-        'MIDT',
+        'MID',
         55.00
     ),
     (
         'MK000000055',
         'TG/2023/1781',
         'ICT2122',
-        'FINT',
+        'FIN',
         62.00
     ),
     (
@@ -1025,14 +1023,14 @@ VALUES -- ICT2142
         'MK000000060',
         'TG/2023/1781',
         'ICT2132',
-        'MIDP',
+        'MID',
         65.00
     ),
     (
         'MK000000061',
         'TG/2023/1781',
         'ICT2132',
-        'FINP',
+        'FIN',
         NULL
     ),
     -- missed final practical
@@ -1069,14 +1067,14 @@ VALUES -- ICT2142
         'MK000000066',
         'TG/2023/1781',
         'ICT2152',
-        'MIDT',
+        'MID',
         52.00
     ),
     (
         'MK000000067',
         'TG/2023/1781',
         'ICT2152',
-        'FINT',
+        'FIN',
         60.00
     ),
     (
@@ -1112,14 +1110,14 @@ VALUES -- ICT2142
         'MK000000072',
         'TG/2023/1781',
         'ENG2122',
-        'MIDT',
+        'MID',
         68.00
     ),
     (
         'MK000000073',
         'TG/2023/1781',
         'ENG2122',
-        'FINT',
+        'FIN',
         70.00
     ),
     (
@@ -1155,7 +1153,7 @@ VALUES -- ICT2142
         'MK000000078',
         'TG/2023/1781',
         'ICT2113',
-        'MIDP',
+        'MID',
         NULL
     ),
     -- missed
@@ -1163,7 +1161,7 @@ VALUES -- ICT2142
         'MK000000079',
         'TG/2023/1781',
         'ICT2113',
-        'FINT',
+        'FIN',
         58.00
     ),
     (
@@ -1199,14 +1197,14 @@ VALUES -- ICT2142
         'MK000000084',
         'TG/2023/1781',
         'TCS2112',
-        'MIDT',
+        'MID',
         59.00
     ),
     (
         'MK000000085',
         'TG/2023/1781',
         'TCS2112',
-        'FINT',
+        'FIN',
         65.00
     ),
     (
@@ -1242,14 +1240,14 @@ VALUES -- ICT2142
         'MK000000090',
         'TG/2023/1781',
         'TCS2122',
-        'MIDT',
+        'MID',
         64.00
     ),
     (
         'MK000000091',
         'TG/2023/1781',
         'TCS2122',
-        'FINT',
+        'FIN',
         66.00
     ),
     (
@@ -1289,7 +1287,7 @@ VALUES -- ICT2142
         'MK000000096',
         'TG/2022/1785',
         'ICT2142',
-        'FINT',
+        'FIN',
         38.00
     ),
     (
@@ -1325,14 +1323,14 @@ VALUES -- ICT2142
         'MK000000101',
         'TG/2022/1785',
         'TCS2122',
-        'MIDT',
+        'MID',
         43.00
     ),
     (
         'MK000000102',
         'TG/2022/1785',
         'TCS2122',
-        'FINT',
+        'FIN',
         41.00
     ),
     (
@@ -1371,7 +1369,7 @@ VALUES -- ICT2142
         'MK000000107',
         'TG/2021/1790',
         'ICT2122',
-        'MIDT',
+        'MID',
         NULL
     ),
     -- missed
@@ -1379,7 +1377,7 @@ VALUES -- ICT2142
         'MK000000108',
         'TG/2021/1790',
         'ICT2122',
-        'FINT',
+        'FIN',
         25.00
     ),
     (
@@ -1416,14 +1414,14 @@ VALUES -- ICT2142
         'MK000000113',
         'TG/2021/1790',
         'ENG2122',
-        'MIDT',
+        'MID',
         32.00
     ),
     (
         'MK000000114',
         'TG/2021/1790',
         'ENG2122',
-        'FINT',
+        'FIN',
         NULL
     ),
     -- missed final
@@ -1461,7 +1459,7 @@ VALUES -- ICT2142
         'MK000000119',
         'TG/2021/1790',
         'ICT2142',
-        'FINT',
+        'FIN',
         NULL
     ),
     -- missed final

@@ -164,8 +164,8 @@ public class MarksDaoTest {
     @Test
     @Order(8)
     void testGetMarksByStudentAndCourse_ReturnsSeededMarks() {
-        // 1781 has seed marks for ICT2142: ASST(65), FINT(null row), QU01(70), QU03(68)
-        // null-mark rows (FINT, QU02) were NOT inserted in seed, so expect 3 rows
+        // 1781 has seed marks for ICT2142: ASST(65), FIN(null row), QU01(70), QU03(68)
+        // null-mark rows (FIN, QU02) were NOT inserted in seed, so expect 3 rows
         List<Mark> marks = dao.getMarksByStudentAndCourse("TG/2023/1781", "ICT2142");
 
         assertNotNull(marks);

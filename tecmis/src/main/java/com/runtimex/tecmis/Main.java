@@ -2,11 +2,14 @@ package com.runtimex.tecmis;
 
 import com.runtimex.tecmis.dao.AttendanceDao;
 import com.runtimex.tecmis.dao.MedicalDao;
+import com.runtimex.tecmis.dao.MarksDao;
 import com.runtimex.tecmis.dao.UserDao;
 import com.runtimex.tecmis.dao.impl.AttendanceDaoImpl;
 import com.runtimex.tecmis.dao.impl.MedicalDaoImpl;
+import com.runtimex.tecmis.dao.impl.MarksDaoImpl;
 import com.runtimex.tecmis.dao.impl.UserDaoImpl;
 import com.runtimex.tecmis.services.impl.AttendanceServiceImpl;
+import com.runtimex.tecmis.services.impl.MarksServiceImpl;
 import com.runtimex.tecmis.ui.TecmisDashboard;
 import com.runtimex.tecmis.utils.DatabaseConnection;
 import javafx.application.Application;
@@ -33,8 +36,11 @@ public class Main extends Application {
             UserDao userDao = new UserDaoImpl(connection);
             AttendanceDao attendanceDao = new AttendanceDaoImpl(connection);
             MedicalDao medicalDao = new MedicalDaoImpl(connection);
-            AttendanceServiceImpl attendanceService = new AttendanceServiceImpl(attendanceDao);
-            root = new TecmisDashboard(userDao, attendanceDao, medicalDao, attendanceService).build();
+                MarksDao marksDao = new MarksDaoImpl(connection);
+                AttendanceServiceImpl attendanceService = new AttendanceServiceImpl(attendanceDao);
+                MarksServiceImpl marksService = new MarksServiceImpl(marksDao, attendanceDao);
+                root = new TecmisDashboard(userDao, attendanceDao, medicalDao, marksDao,
+                    marksService).build();
         }
 
         Scene scene = new Scene(root, 1300, 760);

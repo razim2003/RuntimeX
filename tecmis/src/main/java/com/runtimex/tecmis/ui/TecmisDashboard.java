@@ -2,14 +2,21 @@ package com.runtimex.tecmis.ui;
 
 import com.runtimex.tecmis.dao.AttendanceDao;
 import com.runtimex.tecmis.dao.MedicalDao;
+import com.runtimex.tecmis.dao.MarksDao;
 import com.runtimex.tecmis.dao.UserDao;
 import com.runtimex.tecmis.models.AttendanceRecord;
-import com.runtimex.tecmis.models.AttendanceSummary;
 import com.runtimex.tecmis.models.AuthUser;
+import com.runtimex.tecmis.models.CourseExam;
+import com.runtimex.tecmis.models.CourseResultSummary;
 import com.runtimex.tecmis.models.CourseUnit;
+import com.runtimex.tecmis.models.Mark;
+import com.runtimex.tecmis.models.MarkEntry;
 import com.runtimex.tecmis.models.MedicalRecord;
+import com.runtimex.tecmis.models.StudentGpaSummary;
+import com.runtimex.tecmis.models.StudentInfo;
 import com.runtimex.tecmis.models.UserProfile;
 import com.runtimex.tecmis.services.impl.AttendanceServiceImpl;
+import com.runtimex.tecmis.services.interfaces.MarksService;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -50,22 +57,25 @@ public class TecmisDashboard {
     private final UserDao userDao;
     private final AttendanceDao attendanceDao;
     private final MedicalDao medicalDao;
-    private final AttendanceServiceImpl attendanceService;
+    private final MarksDao marksDao;
+    private final MarksService marksService;
 
     private final ObservableList<UserProfile> userRows = FXCollections.observableArrayList();
     private final ObservableList<AttendanceRecord> attendanceRows = FXCollections.observableArrayList();
     private final ObservableList<MedicalRecord> medicalRows = FXCollections.observableArrayList();
-    private final ObservableList<AttendanceSummary> summaryRows = FXCollections.observableArrayList();
+    private final ObservableList<CourseResultSummary> courseResultRows = FXCollections.observableArrayList();
+    private final ObservableList<StudentGpaSummary> gpaRows = FXCollections.observableArrayList();
 
     private final StackPane root = new StackPane();
     private AuthUser currentUser;
 
     public TecmisDashboard(UserDao userDao, AttendanceDao attendanceDao, MedicalDao medicalDao,
-            AttendanceServiceImpl attendanceService) {
+            MarksDao marksDao, MarksService marksService) {
         this.userDao = userDao;
         this.attendanceDao = attendanceDao;
         this.medicalDao = medicalDao;
-        this.attendanceService = attendanceService;
+        this.marksDao = marksDao;
+        this.marksService = marksService;
     }
 
     public Parent build() {
@@ -285,9 +295,9 @@ public class TecmisDashboard {
                     () -> openPlaceholder("Undergraduate details module is next phase.")));
             list.add(new FeatureCard("🧮", "Eligibility", "See undergraduate eligibility", this::openSummary));
             list.add(new FeatureCard("📝", "Upload Marks", "Upload marks for all kinds of exams",
-                    () -> openPlaceholder("Marks upload module is next phase.")));
+                    this::openMarksUpload));
             list.add(new FeatureCard("📈", "Marks, Grades, GPA", "See undergraduate marks, grades and GPA",
-                    () -> openPlaceholder("Marks, grades and GPA view is next phase.")));
+                    this::openMarksOverview));
             list.add(new FeatureCard("📢", "Notices", "See notices",
                     () -> openPlaceholder("Notice board is next phase.")));
             return list;
@@ -315,7 +325,7 @@ public class TecmisDashboard {
         list.add(new FeatureCard("📚", "My Courses", "See your course details",
                 () -> openPlaceholder("Course details view is next phase.")));
         list.add(new FeatureCard("📈", "My Grades & GPA", "See your grades and GPA",
-                () -> openPlaceholder("Grades/GPA view is next phase.")));
+            this::openMarksOverview));
         list.add(new FeatureCard("🗓", "My Timetable", "See your timetable",
                 () -> openPlaceholder("Timetable view is next phase.")));
         list.add(new FeatureCard("📢", "Notices", "See notices", () -> openPlaceholder("Notice board is next phase.")));
@@ -907,6 +917,379 @@ public class TecmisDashboard {
         refreshBtn.fire();
     }
 
+    private void openMarksUpload() {
+        BorderPane page = buildShell("Marks Upload");
+
+        ComboBox<String> courseBox = new ComboBox<>();
+        courseBox.setPrefWidth(320);
+        courseBox.setEditable(true);
+        loadCourseOptions(courseBox);
+
+        ComboBox<CourseExam> examBox = new ComboBox<>();
+        examBox.setPrefWidth(320);
+        examBox.setCellFactory(list -> new javafx.scene.control.ListCell<>() {
+            @Override
+            protected void updateItem(CourseExam item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : formatExamLabel(item));
+            }
+        });
+        examBox.setButtonCell(new javafx.scene.control.ListCell<>() {
+            @Override
+            protected void updateItem(CourseExam item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : formatExamLabel(item));
+            }
+        });
+
+        ComboBox<StudentInfo> studentBox = new ComboBox<>();
+        studentBox.setPrefWidth(320);
+        studentBox.setCellFactory(list -> new javafx.scene.control.ListCell<>() {
+            @Override
+            protected void updateItem(StudentInfo item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : formatStudentLabel(item));
+            }
+        });
+        studentBox.setButtonCell(new javafx.scene.control.ListCell<>() {
+            @Override
+            protected void updateItem(StudentInfo item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : formatStudentLabel(item));
+            }
+        });
+
+        TextField markField = new TextField();
+        markField.setPromptText("Mark (0-100)");
+
+        Button loadBtn = new Button("Load");
+        Button saveBtn = new Button("Save Mark");
+
+        loadBtn.setOnAction(e -> {
+            String courseCode = parseCourseCode(courseBox.getValue() == null ? "" : courseBox.getValue());
+            if (courseCode.isBlank()) {
+                showError("Select a course first");
+                return;
+            }
+            try {
+                List<CourseExam> exams = marksService.getCourseExams(courseCode);
+                examBox.getItems().setAll(exams);
+                if (!exams.isEmpty()) {
+                    examBox.getSelectionModel().select(0);
+                }
+
+                List<StudentInfo> students = marksService.getStudentsByCourse(courseCode);
+                studentBox.getItems().setAll(students);
+                if (!students.isEmpty()) {
+                    studentBox.getSelectionModel().select(0);
+                }
+            } catch (Exception ex) {
+                showError(ex.getMessage());
+            }
+        });
+
+        saveBtn.setOnAction(e -> {
+            String courseCode = parseCourseCode(courseBox.getValue() == null ? "" : courseBox.getValue());
+            CourseExam exam = examBox.getSelectionModel().getSelectedItem();
+            StudentInfo student = studentBox.getSelectionModel().getSelectedItem();
+            if (courseCode.isBlank() || exam == null || student == null) {
+                showError("Select course, exam, and student");
+                return;
+            }
+
+            double value;
+            try {
+                value = Double.parseDouble(markField.getText().trim());
+            } catch (NumberFormatException ex) {
+                showError("Enter a valid numeric mark");
+                return;
+            }
+
+            if (value < 0 || value > 100) {
+                showError("Mark should be between 0 and 100");
+                return;
+            }
+
+            try {
+                MarkEntry existing = marksDao.getMarkEntry(student.getStudentId(), courseCode,
+                        exam.getExamTypeId());
+                CourseExam courseExam = new CourseExam();
+                courseExam.setCourseCode(courseCode);
+                courseExam.setExamTypeId(exam.getExamTypeId());
+
+                if (existing == null) {
+                    String markId = generateMarkId();
+                    marksDao.addMark(new Mark(markId, student.getStudentId(), courseExam, value));
+                    showInfo("Mark added for " + student.getStudentId());
+                } else {
+                    marksDao.updateMark(new Mark(existing.getMarkId(), student.getStudentId(), courseExam, value));
+                    showInfo("Mark updated for " + student.getStudentId());
+                }
+
+                gpaRows.setAll(marksService.getStudentGpaSummariesForCourse(courseCode, true));
+            } catch (Exception ex) {
+                showError(ex.getMessage());
+            }
+        });
+
+        HBox filters = new HBox(8,
+                new Label("Course:"), courseBox,
+                loadBtn);
+        HBox entryRow = new HBox(8,
+                new Label("Exam:"), examBox,
+                new Label("Student:"), studentBox,
+                new Label("Mark:"), markField,
+                saveBtn);
+
+        VBox body = new VBox(12, filters, entryRow);
+        body.setPadding(new Insets(16));
+        page.setCenter(body);
+
+        root.getChildren().setAll(page);
+        loadBtn.fire();
+    }
+
+    private void openMarksOverview() {
+        if ("Undergraduate".equals(currentUser.getUserType())) {
+            openUndergraduateMarks();
+        } else {
+            openLecturerMarks();
+        }
+    }
+
+    private void openUndergraduateMarks() {
+        BorderPane page = buildShell("My Grades & GPA");
+
+        TableView<CourseResultSummary> table = new TableView<>(courseResultRows);
+
+        TableColumn<CourseResultSummary, String> courseCol = new TableColumn<>("Course");
+        courseCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getCourseCode()));
+
+        TableColumn<CourseResultSummary, String> caCol = new TableColumn<>("CA Status");
+        caCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getCaStatus()));
+
+        TableColumn<CourseResultSummary, String> endCol = new TableColumn<>("End Status");
+        endCol.setCellValueFactory(x -> new SimpleStringProperty(formatEndStatusForStudent(x.getValue())));
+
+        TableColumn<CourseResultSummary, String> gradeCol = new TableColumn<>("Grade");
+        gradeCol.setCellValueFactory(x -> new SimpleStringProperty(formatGradeForStudent(x.getValue())));
+
+        table.getColumns().add(courseCol);
+        table.getColumns().add(caCol);
+        table.getColumns().add(endCol);
+        table.getColumns().add(gradeCol);
+
+        Label sgpaLabel = new Label("SGPA: -");
+        Label cgpaLabel = new Label("CGPA: -");
+
+        Button refreshBtn = new Button("Refresh");
+        refreshBtn.setOnAction(e -> {
+            try {
+                List<CourseUnit> courses = marksService.getCoursesByStudent(currentUser.getId());
+                List<CourseResultSummary> rows = new ArrayList<>();
+                for (CourseUnit course : courses) {
+                    rows.add(marksService.getCourseResult(currentUser.getId(),
+                            course.getCourseCode(), true));
+                }
+                courseResultRows.setAll(rows);
+
+                StudentGpaSummary gpa = marksService.getStudentGpaSummary(currentUser.getId(), true);
+                sgpaLabel.setText(String.format("SGPA: %.2f", gpa.getSgpa()));
+                cgpaLabel.setText(String.format("CGPA: %.2f", gpa.getCgpa()));
+            } catch (Exception ex) {
+                showError(ex.getMessage());
+            }
+        });
+
+        HBox gpaBar = new HBox(16, sgpaLabel, cgpaLabel, refreshBtn);
+        VBox body = new VBox(12, table, gpaBar);
+        body.setPadding(new Insets(16));
+        page.setCenter(body);
+
+        root.getChildren().setAll(page);
+        refreshBtn.fire();
+    }
+
+    private void openLecturerMarks() {
+        BorderPane page = buildShell("Marks, Grades & GPA");
+
+        ComboBox<String> courseBox = new ComboBox<>();
+        courseBox.setPrefWidth(320);
+        courseBox.setEditable(true);
+        loadCourseOptions(courseBox);
+
+        TextField studentFilter = new TextField();
+        studentFilter.setPromptText("Filter Student ID");
+
+        CheckBox includeMedical = new CheckBox("Count approved medical for attendance");
+        includeMedical.setSelected(true);
+
+        Button loadBtn = new Button("Load Results");
+        Button gpaBtn = new Button("Load GPA");
+
+        TableView<CourseResultSummary> resultsTable = new TableView<>(courseResultRows);
+
+        TableColumn<CourseResultSummary, String> idCol = new TableColumn<>("Student ID");
+        idCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getStudentId()));
+
+        TableColumn<CourseResultSummary, String> nameCol = new TableColumn<>("Name");
+        nameCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getStudentName()));
+
+        TableColumn<CourseResultSummary, String> attCol = new TableColumn<>("Attendance %");
+        attCol.setCellValueFactory(x -> new SimpleStringProperty(String.format("%.2f", x.getValue().getAttendancePercentage())));
+
+        TableColumn<CourseResultSummary, String> caPctCol = new TableColumn<>("CA %");
+        caPctCol.setCellValueFactory(x -> new SimpleStringProperty(String.format("%.2f", x.getValue().getCaPercentage())));
+
+        TableColumn<CourseResultSummary, String> caStatusCol = new TableColumn<>("CA Status");
+        caStatusCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getCaStatus()));
+
+        TableColumn<CourseResultSummary, String> eligCol = new TableColumn<>("Eligibility");
+        eligCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getEligibilityStatus()));
+
+        TableColumn<CourseResultSummary, String> endPctCol = new TableColumn<>("End %");
+        endPctCol.setCellValueFactory(x -> new SimpleStringProperty(String.format("%.2f", x.getValue().getEndPercentage())));
+
+        TableColumn<CourseResultSummary, String> endStatusCol = new TableColumn<>("End Status");
+        endStatusCol.setCellValueFactory(x -> new SimpleStringProperty(formatEndStatusForStudent(x.getValue())));
+
+        TableColumn<CourseResultSummary, String> totalCol = new TableColumn<>("Total");
+        totalCol.setCellValueFactory(x -> new SimpleStringProperty(formatTotalForStudent(x.getValue())));
+
+        TableColumn<CourseResultSummary, String> gradeCol = new TableColumn<>("Grade");
+        gradeCol.setCellValueFactory(x -> new SimpleStringProperty(formatGradeForStudent(x.getValue())));
+
+        resultsTable.getColumns().add(idCol);
+        resultsTable.getColumns().add(nameCol);
+        resultsTable.getColumns().add(attCol);
+        resultsTable.getColumns().add(caPctCol);
+        resultsTable.getColumns().add(caStatusCol);
+        resultsTable.getColumns().add(eligCol);
+        resultsTable.getColumns().add(endPctCol);
+        resultsTable.getColumns().add(endStatusCol);
+        resultsTable.getColumns().add(totalCol);
+        resultsTable.getColumns().add(gradeCol);
+
+        TableView<StudentGpaSummary> gpaTable = new TableView<>(gpaRows);
+        TableColumn<StudentGpaSummary, String> gpaIdCol = new TableColumn<>("Student ID");
+        gpaIdCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getStudentId()));
+        TableColumn<StudentGpaSummary, String> gpaNameCol = new TableColumn<>("Name");
+        gpaNameCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getStudentName()));
+        TableColumn<StudentGpaSummary, String> sgpaCol = new TableColumn<>("SGPA");
+        sgpaCol.setCellValueFactory(x -> new SimpleStringProperty(String.format("%.2f", x.getValue().getSgpa())));
+        TableColumn<StudentGpaSummary, String> cgpaCol = new TableColumn<>("CGPA");
+        cgpaCol.setCellValueFactory(x -> new SimpleStringProperty(String.format("%.2f", x.getValue().getCgpa())));
+
+        gpaTable.getColumns().add(gpaIdCol);
+        gpaTable.getColumns().add(gpaNameCol);
+        gpaTable.getColumns().add(sgpaCol);
+        gpaTable.getColumns().add(cgpaCol);
+
+        loadBtn.setOnAction(e -> {
+            String courseCode = parseCourseCode(courseBox.getValue() == null ? "" : courseBox.getValue());
+            if (courseCode.isBlank()) {
+                showError("Select a course first");
+                return;
+            }
+            try {
+                List<CourseResultSummary> results = marksService.getCourseResultsForBatch(
+                        courseCode, includeMedical.isSelected());
+                String filter = studentFilter.getText().trim();
+                if (!filter.isBlank()) {
+                    results.removeIf(r -> !r.getStudentId().contains(filter));
+                }
+                courseResultRows.setAll(results);
+            } catch (Exception ex) {
+                showError(ex.getMessage());
+            }
+        });
+
+        gpaBtn.setOnAction(e -> {
+            String courseCode = parseCourseCode(courseBox.getValue() == null ? "" : courseBox.getValue());
+            if (courseCode.isBlank()) {
+                showError("Select a course first");
+                return;
+            }
+            try {
+                List<StudentGpaSummary> results = marksService.getStudentGpaSummariesForCourse(
+                        courseCode, includeMedical.isSelected());
+                String filter = studentFilter.getText().trim();
+                if (!filter.isBlank()) {
+                    results.removeIf(r -> !r.getStudentId().contains(filter));
+                }
+                gpaRows.setAll(results);
+            } catch (Exception ex) {
+                showError(ex.getMessage());
+            }
+        });
+
+        HBox controls = new HBox(10,
+                new Label("Course:"), courseBox,
+                studentFilter,
+                includeMedical,
+                loadBtn,
+                gpaBtn);
+
+        VBox body = new VBox(12, controls, resultsTable, new Label("GPA Summary"), gpaTable);
+        body.setPadding(new Insets(16));
+        page.setCenter(body);
+
+        root.getChildren().setAll(page);
+        loadBtn.fire();
+        gpaBtn.fire();
+    }
+
+    private String formatExamLabel(CourseExam exam) {
+        String name = exam.getExamName();
+        if (name == null || name.isBlank()) {
+            name = exam.getExamTypeName();
+        }
+        if (name == null || name.isBlank()) {
+            name = "Exam";
+        }
+        return exam.getExamTypeId() + " - " + name;
+    }
+
+    private String formatStudentLabel(StudentInfo student) {
+        return student.getStudentId() + " - " + student.getStudentName();
+    }
+
+    private String formatEndStatusForStudent(CourseResultSummary summary) {
+        if (summary.isMedicalConcession()) {
+            return "MC";
+        }
+        return summary.getEndStatus();
+    }
+
+    private String formatGradeForStudent(CourseResultSummary summary) {
+        if (summary.isMedicalConcession()) {
+            return "MC";
+        }
+        return summary.getGrade();
+    }
+
+    private String formatTotalForStudent(CourseResultSummary summary) {
+        if (summary.isMedicalConcession()) {
+            return "MC";
+        }
+        return String.format("%.2f", summary.getTotalMark());
+    }
+
+    private void loadCourseOptions(ComboBox<String> courseBox) {
+        try {
+            courseBox.getItems().clear();
+            List<CourseUnit> courses = marksService.getAllCourses();
+            for (CourseUnit course : courses) {
+                courseBox.getItems().add(course.getCourseCode() + " - " + course.getTitle());
+            }
+            if (!courseBox.getItems().isEmpty()) {
+                courseBox.getSelectionModel().select(0);
+            }
+        } catch (Exception ex) {
+            showError(ex.getMessage());
+        }
+    }
+
     private String parseCourseCode(String courseDisplay) {
         int idx = courseDisplay.indexOf(" - ");
         if (idx <= 0) {
@@ -920,6 +1303,11 @@ public class TecmisDashboard {
         long value = Math.abs(System.nanoTime() % 46656L); // 36^3 combinations
         String suffix = String.format("%3s", Long.toString(value, 36)).replace(' ', '0').toUpperCase();
         return "REF" + suffix;
+    }
+
+    private String generateMarkId() {
+        long value = Math.abs(System.nanoTime() % 1_000_000_000L);
+        return "MK" + String.format("%09d", value);
     }
 
     private void showMedicalPhoto(String path) {
@@ -947,51 +1335,70 @@ public class TecmisDashboard {
     }
 
     private void openSummary() {
-        BorderPane page = buildShell("Attendance Eligibility");
+        BorderPane page = buildShell("Eligibility (Attendance + CA)");
 
-        TextField courseField = new TextField("ICT2132");
-        courseField.setPromptText("Course Code");
+        ComboBox<String> courseBox = new ComboBox<>();
+        courseBox.setPrefWidth(320);
+        courseBox.setEditable(true);
+        loadCourseOptions(courseBox);
 
-        ComboBox<String> componentBox = new ComboBox<>();
-        componentBox.getItems().addAll("Combined", "Theory", "Practical");
-        componentBox.setValue("Combined");
+        TextField studentFilter = new TextField();
+        studentFilter.setPromptText("Filter Student ID");
 
-        CheckBox includeMedical = new CheckBox("Count approved medical absences as present");
+        CheckBox includeMedical = new CheckBox("Count approved medical for attendance");
         includeMedical.setSelected(true);
 
         Button loadBtn = new Button("Generate Summary");
 
-        TableView<AttendanceSummary> table = new TableView<>(summaryRows);
+        TableView<CourseResultSummary> table = new TableView<>(courseResultRows);
 
-        TableColumn<AttendanceSummary, String> stuCol = new TableColumn<>("Student ID");
+        TableColumn<CourseResultSummary, String> stuCol = new TableColumn<>("Student ID");
         stuCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getStudentId()));
-        TableColumn<AttendanceSummary, String> nameCol = new TableColumn<>("Name");
+
+        TableColumn<CourseResultSummary, String> nameCol = new TableColumn<>("Name");
         nameCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getStudentName()));
-        TableColumn<AttendanceSummary, String> pctCol = new TableColumn<>("Attendance %");
-        pctCol.setCellValueFactory(x -> new SimpleStringProperty(String.format("%.2f", x.getValue().getPercentage())));
-        TableColumn<AttendanceSummary, String> eligCol = new TableColumn<>("Eligibility");
-        eligCol.setCellValueFactory(
-                x -> new SimpleStringProperty(x.getValue().isEligible() ? "Eligible" : "Not Eligible"));
+
+        TableColumn<CourseResultSummary, String> attCol = new TableColumn<>("Attendance %");
+        attCol.setCellValueFactory(x -> new SimpleStringProperty(String.format("%.2f", x.getValue().getAttendancePercentage())));
+
+        TableColumn<CourseResultSummary, String> caCol = new TableColumn<>("CA %");
+        caCol.setCellValueFactory(x -> new SimpleStringProperty(String.format("%.2f", x.getValue().getCaPercentage())));
+
+        TableColumn<CourseResultSummary, String> caStatusCol = new TableColumn<>("CA Status");
+        caStatusCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getCaStatus()));
+
+        TableColumn<CourseResultSummary, String> eligCol = new TableColumn<>("Eligibility");
+        eligCol.setCellValueFactory(x -> new SimpleStringProperty(x.getValue().getEligibilityStatus()));
 
         table.getColumns().add(stuCol);
         table.getColumns().add(nameCol);
-        table.getColumns().add(pctCol);
+        table.getColumns().add(attCol);
+        table.getColumns().add(caCol);
+        table.getColumns().add(caStatusCol);
         table.getColumns().add(eligCol);
 
         loadBtn.setOnAction(e -> {
+            String courseCode = parseCourseCode(courseBox.getValue() == null ? "" : courseBox.getValue());
+            if (courseCode.isBlank()) {
+                showError("Select a course first");
+                return;
+            }
             try {
-                summaryRows.setAll(attendanceService.getSummaryForCourse(
-                        courseField.getText().trim(),
-                        componentBox.getValue(),
-                        includeMedical.isSelected()));
+                List<CourseResultSummary> results = marksService.getCourseResultsForBatch(
+                        courseCode, includeMedical.isSelected());
+                String filter = studentFilter.getText().trim();
+                if (!filter.isBlank()) {
+                    results.removeIf(r -> !r.getStudentId().contains(filter));
+                }
+                courseResultRows.setAll(results);
             } catch (Exception ex) {
                 showError(ex.getMessage());
             }
         });
 
         HBox controls = new HBox(8,
-                new Label("Course:"), courseField,
-                new Label("Component:"), componentBox,
+                new Label("Course:"), courseBox,
+                studentFilter,
                 includeMedical,
                 loadBtn);
 

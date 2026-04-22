@@ -1,4 +1,4 @@
-package main.java.com.runtimex.tecmis.dao;
+package com.runtimex.tecmis.dao;
 
 import com.runtimex.tecmis.models.Event;
 
