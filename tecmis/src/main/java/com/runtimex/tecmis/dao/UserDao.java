@@ -15,4 +15,11 @@ public interface UserDao {
     void updateUserContact(String userId, String email, String contactNo);
 
     void updateMyProfile(String userId, String email, String contactNo, String profileImagePath);
+
+    void createUser(String id, String firstName, String lastName, String email,
+                    String contactNo, String password, String userType);
+
+    void deleteUser(String userId);
+
+    List<UserProfile> findUndergraduates(String keyword);
 }
