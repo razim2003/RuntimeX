@@ -10,6 +10,7 @@ public class Notice {
     private Date   date;
     private String filePath;   // absolute path on disk, nullable
     private String fileType;   // "pdf" | "png" | null
+    private String audience;   // All | Admin | Lecturer | TechnicalOfficer | Undergraduate
 
     public Notice() {}
 
@@ -28,6 +29,18 @@ public class Notice {
         this.date     = date;
         this.filePath = filePath;
         this.fileType = fileType;
+        this.audience = "All";
+    }
+
+    public Notice(String noticeId, String adminId, String title, Date date,
+                  String filePath, String fileType, String audience) {
+        this.noticeId = noticeId;
+        this.adminId  = adminId;
+        this.title    = title;
+        this.date     = date;
+        this.filePath = filePath;
+        this.fileType = fileType;
+        this.audience = audience;
     }
 
     public String getNoticeId()               { return noticeId; }
@@ -47,6 +60,9 @@ public class Notice {
 
     public String getFileType()               { return fileType; }
     public void   setFileType(String v)       { this.fileType = v; }
+
+    public String getAudience()               { return audience; }
+    public void   setAudience(String v)       { this.audience = v; }
 
     /** Returns true when this notice has an attached file. */
     public boolean hasFile() {

@@ -131,6 +131,7 @@ CREATE TABLE notice (
     date DATE NOT NULL,
     file_path VARCHAR(500) NULL,
     file_type VARCHAR(10) NULL,
+    audience ENUM('All','Admin','Lecturer','TechnicalOfficer','Undergraduate') NOT NULL DEFAULT 'All',
     FOREIGN KEY (admin_id) REFERENCES admin(admin_id)
 );
 CREATE TABLE blog (
