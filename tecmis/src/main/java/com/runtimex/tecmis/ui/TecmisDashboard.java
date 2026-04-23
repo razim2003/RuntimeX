@@ -234,6 +234,7 @@ public class TecmisDashboard {
             list.add(new FeatureCard("👥", "User Profiles", "Create and maintain user profiles",           this::openUserManagement));
             list.add(new FeatureCard("📚", "Courses",       "Create and maintain course details",          this::openCourseManagement));
             list.add(new FeatureCard("📢", "Notices",       "Create and maintain notices",                 this::openNoticeManagement));
+            list.add(new FeatureCard("📰", "Notice Board",  "See notices",                                  this::openNoticeBoard));
             list.add(new FeatureCard("🗓", "Timetables",    "Create and maintain timetables",              this::openAdminTimetable));
             return list;
         }
@@ -903,13 +904,20 @@ public class TecmisDashboard {
         TableColumn<UserProfile,String> contactCol = col("Contact", x -> x.getContactNo());
         TableColumn<UserProfile,String> typeCol    = col("Type",    x -> x.getUserType());
         TableColumn<UserProfile,String> statusCol  = col("Status",  x -> x.getStatus() == null ? "" : x.getStatus());
+        idCol.setMinWidth(140); idCol.setPrefWidth(160);
+        contactCol.setMinWidth(120); contactCol.setPrefWidth(150);
         table.getColumns().addAll(idCol, nameCol, emailCol, contactCol, typeCol, statusCol);
         table.setPrefHeight(280);
 
         // ── Edit contact bar ──
         TextField emailEdit   = new TextField(); emailEdit.setPromptText("Updated email");
         TextField contactEdit = new TextField(); contactEdit.setPromptText("Updated contact");
+        ComboBox<String> statusEdit = new ComboBox<>();
+        statusEdit.getItems().addAll("Proper", "Repeat", "Suspended");
+        statusEdit.setDisable(true);
         Button    updateBtn   = new Button("💾 Update Contact");
+        Button    updateStatusBtn = new Button("🧾 Update Status");
+        updateStatusBtn.setDisable(true);
         Button    deleteBtn   = new Button("🗑 Delete User");
         deleteBtn.setStyle("-fx-background-color: #dc2626; -fx-text-fill: white;");
 
@@ -917,6 +925,14 @@ public class TecmisDashboard {
             if (sel != null) {
                 emailEdit.setText(sel.getEmail());
                 contactEdit.setText(sel.getContactNo());
+                boolean isUg = "Undergraduate".equals(sel.getUserType());
+                statusEdit.setDisable(!isUg);
+                updateStatusBtn.setDisable(!isUg);
+                statusEdit.setValue(isUg ? (sel.getStatus() == null ? "Proper" : sel.getStatus()) : null);
+            } else {
+                statusEdit.setDisable(true);
+                updateStatusBtn.setDisable(true);
+                statusEdit.setValue(null);
             }
         });
 
@@ -931,6 +947,19 @@ public class TecmisDashboard {
             try {
                 userDao.updateUserContact(sel.getId(), emailEdit.getText().trim(), contactEdit.getText().trim());
                 showInfo("Contact updated successfully");
+                loadBtn.fire();
+            } catch (Exception ex) { showError(ex.getMessage()); }
+        });
+
+        updateStatusBtn.setOnAction(e -> {
+            UserProfile sel = table.getSelectionModel().getSelectedItem();
+            if (sel == null) { showError("Select a user first"); return; }
+            if (!"Undergraduate".equals(sel.getUserType())) { showError("Status applies only to undergraduates"); return; }
+            String status = statusEdit.getValue();
+            if (status == null || status.isBlank()) { showError("Select a status first"); return; }
+            try {
+                userDao.updateUndergraduateStatus(sel.getId(), status);
+                showInfo("Undergraduate status updated");
                 loadBtn.fire();
             } catch (Exception ex) { showError(ex.getMessage()); }
         });
@@ -963,8 +992,18 @@ public class TecmisDashboard {
         ComboBox<String> newType = new ComboBox<>();
         newType.getItems().addAll("Admin","Lecturer","TechnicalOfficer","Undergraduate");
         newType.setPromptText("User Type");
+        ComboBox<String> ugStatus = new ComboBox<>();
+        ugStatus.getItems().addAll("Proper", "Repeat", "Suspended");
+        ugStatus.setValue("Proper");
+        ugStatus.setDisable(true);
         Button createBtn = new Button("✅ Create User");
         createBtn.setStyle("-fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-weight: bold;");
+
+        newType.setOnAction(e -> {
+            boolean isUg = "Undergraduate".equals(newType.getValue());
+            ugStatus.setDisable(!isUg);
+            if (!isUg) { ugStatus.setValue("Proper"); }
+        });
 
         GridPane createForm = new GridPane();
         createForm.setHgap(8); createForm.setVgap(6);
@@ -972,7 +1011,8 @@ public class TecmisDashboard {
         createForm.addRow(0, new Label("ID:"), newId, new Label("First Name:"), newFirst);
         createForm.addRow(1, new Label("Last Name:"), newLast, new Label("Email:"), newEmail);
         createForm.addRow(2, new Label("Contact:"), newContact, new Label("Password:"), newPwd);
-        createForm.addRow(3, new Label("Type:"), newType, createBtn);
+        createForm.addRow(3, new Label("Type:"), newType, new Label("UG Status:"), ugStatus);
+        createForm.addRow(4, new Label(""), createBtn);
 
         createBtn.setOnAction(e -> {
             String id   = newId.getText().trim();
@@ -988,9 +1028,13 @@ public class TecmisDashboard {
             }
             try {
                 userDao.createUser(id, fn, ln, em, cn, pw, tp);
+                if ("Undergraduate".equals(tp)) {
+                    userDao.updateUndergraduateStatus(id, ugStatus.getValue());
+                }
                 showInfo("User " + id + " created successfully.");
                 newId.clear(); newFirst.clear(); newLast.clear();
                 newEmail.clear(); newContact.clear(); newPwd.clear(); newType.setValue(null);
+                ugStatus.setValue("Proper"); ugStatus.setDisable(true);
                 loadBtn.fire();
             } catch (Exception ex) { showError(ex.getMessage()); }
         });
@@ -998,7 +1042,11 @@ public class TecmisDashboard {
         // ── Layout ──
         HBox filterBar  = new HBox(8, new Label("Type:"), typeFilter, keywordField, loadBtn);
         filterBar.setAlignment(Pos.CENTER_LEFT);
-        HBox editBar    = new HBox(8, new Label("Email:"), emailEdit, new Label("Contact:"), contactEdit, updateBtn, deleteBtn);
+        HBox editBar    = new HBox(8,
+            new Label("Email:"), emailEdit,
+            new Label("Contact:"), contactEdit, updateBtn,
+            new Label("Status:"), statusEdit, updateStatusBtn,
+            deleteBtn);
         editBar.setAlignment(Pos.CENTER_LEFT);
 
         Separator sep = new Separator();
@@ -1065,7 +1113,9 @@ public class TecmisDashboard {
         Button addBtn = new Button("Add Attendance"); addBtn.setDisable(!canManage);
         TextField filterStudent = new TextField(selfOnly ? currentUser.getId() : "");
         filterStudent.setPromptText("Filter Student ID"); filterStudent.setEditable(!selfOnly);
-        TextField filterCourse = new TextField(); filterCourse.setPromptText("Filter Course");
+        ComboBox<String> filterCourse = new ComboBox<>();
+        filterCourse.setPromptText("Filter Course");
+        filterCourse.setPrefWidth(220);
         ComboBox<String> filterComponent = new ComboBox<>(); filterComponent.getItems().addAll("Combined","Theory","Practical"); filterComponent.setValue("Combined");
         Button refreshBtn = new Button("Refresh");
         ComboBox<String> ugCourseSelector = new ComboBox<>(); ugCourseSelector.setPrefWidth(420);
@@ -1093,8 +1143,12 @@ public class TecmisDashboard {
         });
         refreshBtn.setOnAction(e -> {
             try {
+                String courseFilter = "";
+                if (filterCourse.getValue() != null && !filterCourse.getValue().isBlank()) {
+                    courseFilter = parseCourseCode(filterCourse.getValue());
+                }
                 attendanceRows.setAll(attendanceDao.findAttendance(
-                        filterStudent.getText().trim(), filterCourse.getText().trim(), filterComponent.getValue()));
+                        filterStudent.getText().trim(), courseFilter, filterComponent.getValue()));
                 if (selfOnly) {
                     int totalHours = attendanceRows.size() * 2, presentHours = 0;
                     for (AttendanceRecord r : attendanceRows) if ("Present".equals(r.getStatus())) presentHours += 2;
@@ -1136,18 +1190,35 @@ public class TecmisDashboard {
         VBox body;
         if (selfOnly) {
             List<CourseUnit> courses = attendanceDao.getCoursesByStudent(currentUser.getId());
-            for (CourseUnit c : courses) ugCourseSelector.getItems().add(c.getCourseCode() + " - " + c.getTitle());
+            for (CourseUnit c : courses) {
+                String item = c.getCourseCode() + " - " + c.getTitle();
+                ugCourseSelector.getItems().add(item);
+                filterCourse.getItems().add(item);
+            }
             if (!ugCourseSelector.getItems().isEmpty()) {
                 ugCourseSelector.setValue(ugCourseSelector.getItems().get(0));
-                filterCourse.setText(parseCourseCode(ugCourseSelector.getValue()));
+                filterCourse.setValue(ugCourseSelector.getValue());
             }
-            ugCourseSelector.setOnAction(e -> { String s = ugCourseSelector.getValue(); if (s != null) { filterCourse.setText(parseCourseCode(s)); refreshBtn.fire(); } });
+            ugCourseSelector.setOnAction(e -> {
+                String s = ugCourseSelector.getValue();
+                if (s != null) { filterCourse.setValue(s); refreshBtn.fire(); }
+            });
             HBox courseBar2 = new HBox(10, new Label("Course:"), ugCourseSelector, filterComponent, refreshBtn);
             HBox hoursBar   = new HBox(10, ugHoursLabel, ugHoursBar);
             body = new VBox(10, courseBar2, hoursBar, table);
         } else if (canManage) {
+            try {
+                for (CourseUnit c : marksService.getAllCourses()) {
+                    filterCourse.getItems().add(c.getCourseCode() + " - " + c.getTitle());
+                }
+            } catch (Exception ex) { showError(ex.getMessage()); }
             body = new VBox(10, addBar, filterBar, table, updateBar);
         } else {
+            try {
+                for (CourseUnit c : marksService.getAllCourses()) {
+                    filterCourse.getItems().add(c.getCourseCode() + " - " + c.getTitle());
+                }
+            } catch (Exception ex) { showError(ex.getMessage()); }
             body = new VBox(10, filterBar, table);
         }
         body.setPadding(new Insets(16));
@@ -1173,8 +1244,10 @@ public class TecmisDashboard {
         DatePicker startDate = new DatePicker(LocalDate.now()), endDate = new DatePicker(LocalDate.now());
         ComboBox<String> statusBox = new ComboBox<>(); statusBox.getItems().addAll("Pending","Approved","Rejected"); statusBox.setValue("Pending"); statusBox.setDisable(true);
         Button addBtn = new Button("Submit Medical"); addBtn.setDisable(!canSubmitMedical);
-        TextField filterStudent = new TextField(selfOnly ? currentUser.getId() : ""); filterStudent.setPromptText("Filter by Student ID"); filterStudent.setEditable(canManage);
-        Button refreshBtn = new Button("Refresh");
+        TextField filterStudent = new TextField(selfOnly ? currentUser.getId() : "");
+        filterStudent.setPromptText("Filter by Student ID");
+        filterStudent.setEditable(!selfOnly);
+        Button refreshBtn = new Button("Filter");
         TableView<MedicalRecord> table = new TableView<>(medicalRows);
         table.getColumns().addAll(col("Ref No",  x -> x.getRefNo()), col("Student", x -> x.getStudentId()),
                 col("Status", x -> x.getStatus()), col("Start",x -> x.getStartDate()),
@@ -1469,13 +1542,11 @@ public class TecmisDashboard {
             if (title.isEmpty() || creditStr.isEmpty()) { showError("Title and credits are required"); return; }
             int credits;
             try { credits = Integer.parseInt(creditStr); } catch (NumberFormatException ex) { showError("Credits must be a number"); return; }
-            // CourseUnitDAO has no updateCourse – build it inline via direct add (replace)
             try {
-                courseUnitDAO.deleteCourse(sel.getCourseCode());
                 CourseUnit updated = new CourseUnit(sel.getCourseCode(), title, credits);
-                courseUnitDAO.addCourse(updated);
-                showInfo("Course updated.");
-                reloadAll.run();
+                boolean ok = courseUnitDAO.updateCourse(updated);
+                if (ok) { showInfo("Course updated."); reloadAll.run(); }
+                else { showError("Course not found for update."); }
             } catch (Exception ex) { showError(ex.getMessage()); }
         });
 
@@ -1563,6 +1634,8 @@ public class TecmisDashboard {
         searchField.setPromptText("Search by title…"); searchField.setPrefWidth(260);
         Button searchBtn  = new Button("🔍 Search");
         Button loadAllBtn = new Button("Load All");
+        Button viewBoardBtn = new Button("📰 View Board");
+        viewBoardBtn.setOnAction(e -> openNoticeBoard());
 
         // ── table ──
         TableView<Notice> table = new TableView<>(noticeRows);
@@ -1579,6 +1652,9 @@ public class TecmisDashboard {
         editHeading.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
 
         TextField editTitle      = new TextField(); editTitle.setPromptText("Title");
+        ComboBox<String> editAudience = new ComboBox<>();
+        editAudience.getItems().addAll("All", "Admin", "Lecturer", "TechnicalOfficer", "Undergraduate");
+        editAudience.setValue("All");
         Label     editFileLabel  = new Label("No file attached");
         editFileLabel.setStyle("-fx-text-fill: #475569;");
         Button    editBrowseBtn  = new Button("📂 Replace File…");
@@ -1615,25 +1691,30 @@ public class TecmisDashboard {
             editFileClear[0]  = false;
             if (sel != null) {
                 editTitle.setText(sel.getTitle());
+                editAudience.setValue(sel.getAudience() == null ? "All" : sel.getAudience());
                 editFileLabel.setText(sel.hasFile()
                         ? "Current: " + new java.io.File(sel.getFilePath()).getName()
                         : "No file attached");
             } else {
                 editTitle.clear();
+                editAudience.setValue("All");
                 editFileLabel.setText("No file attached");
             }
         });
 
         Runnable reloadAll = () -> {
-            try { noticeRows.setAll(noticeDao.getAllNotices()); }
+            try { noticeRows.setAll(noticeDao.getNoticesForAudience(currentUser.getUserType())); }
             catch (Exception ex) { showError(ex.getMessage()); }
         };
 
         loadAllBtn.setOnAction(e -> reloadAll.run());
         searchBtn.setOnAction(e -> {
             String kw = searchField.getText().trim();
-            try { noticeRows.setAll(kw.isEmpty() ? noticeDao.getAllNotices() : noticeDao.searchNotices(kw)); }
-            catch (Exception ex) { showError(ex.getMessage()); }
+            try {
+                noticeRows.setAll(kw.isEmpty()
+                        ? noticeDao.getNoticesForAudience(currentUser.getUserType())
+                        : noticeDao.searchNoticesForAudience(kw, currentUser.getUserType()));
+            } catch (Exception ex) { showError(ex.getMessage()); }
         });
 
         updateBtn.setOnAction(e -> {
@@ -1642,6 +1723,7 @@ public class TecmisDashboard {
             String title = editTitle.getText().trim();
             if (title.isEmpty()) { showError("Title cannot be empty."); return; }
             sel.setTitle(title);
+            sel.setAudience(editAudience.getValue());
             // handle file changes
             if (editFileClear[0]) {
                 sel.setFilePath(null); sel.setFileType(null);
@@ -1676,6 +1758,9 @@ public class TecmisDashboard {
         createHeading.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
 
         TextField newTitle     = new TextField(); newTitle.setPromptText("Notice title…"); newTitle.setPrefWidth(340);
+        ComboBox<String> newAudience = new ComboBox<>();
+        newAudience.getItems().addAll("All", "Admin", "Lecturer", "TechnicalOfficer", "Undergraduate");
+        newAudience.setValue("All");
         Label     newFileLabel = new Label("No file selected (optional)");
         newFileLabel.setStyle("-fx-text-fill: #475569;");
         Button    newBrowseBtn = new Button("📂 Attach File…");
@@ -1706,17 +1791,18 @@ public class TecmisDashboard {
                     storedType = fileExt(newChosenFile[0].getName());
                 } catch (Exception ex) { showError("File copy failed: " + ex.getMessage()); return; }
             }
-            Notice n = new Notice(noticeId, currentUser.getId(), title, null, storedPath, storedType);
+            Notice n = new Notice(noticeId, currentUser.getId(), title, null, storedPath, storedType, newAudience.getValue());
             try {
                 noticeDao.createNotice(n, currentUser.getId());
                 showInfo("Notice posted" + (storedPath != null ? " with attachment." : "."));
-                newTitle.clear(); newChosenFile[0] = null; newFileLabel.setText("No file selected (optional)");
+                newTitle.clear(); newAudience.setValue("All");
+                newChosenFile[0] = null; newFileLabel.setText("No file selected (optional)");
                 reloadAll.run();
             } catch (Exception ex) { showError(ex.getMessage()); }
         });
 
         // ── layout ──
-        HBox searchBar = new HBox(8, searchField, searchBtn, loadAllBtn);
+        HBox searchBar = new HBox(8, searchField, searchBtn, loadAllBtn, viewBoardBtn);
         searchBar.setAlignment(Pos.CENTER_LEFT);
 
         HBox fileEditRow = new HBox(8, editBrowseBtn, editClearFile, editFileLabel);
@@ -1724,7 +1810,8 @@ public class TecmisDashboard {
         GridPane editForm = new GridPane();
         editForm.setHgap(10); editForm.setVgap(6);
         editForm.addRow(0, new Label("Title:"), editTitle);
-        editForm.addRow(1, new Label("File:"), fileEditRow);
+        editForm.addRow(1, new Label("Audience:"), editAudience);
+        editForm.addRow(2, new Label("File:"), fileEditRow);
         HBox editBtnRow = new HBox(8, updateBtn, deleteBtn);
         VBox editSection = new VBox(6, editHeading, editForm, editBtnRow);
         editSection.setPadding(new Insets(8, 0, 0, 0));
@@ -1734,8 +1821,9 @@ public class TecmisDashboard {
         GridPane createForm = new GridPane();
         createForm.setHgap(10); createForm.setVgap(6);
         createForm.addRow(0, new Label("Title:"), newTitle);
-        createForm.addRow(1, new Label("File:"), newFileRow);
-        createForm.addRow(2, new Label(), addBtn);
+        createForm.addRow(1, new Label("Audience:"), newAudience);
+        createForm.addRow(2, new Label("File:"), newFileRow);
+        createForm.addRow(3, new Label(), addBtn);
         VBox createSection = new VBox(6, createHeading, createForm);
         createSection.setPadding(new Insets(8, 0, 0, 0));
 
@@ -1867,6 +1955,11 @@ public class TecmisDashboard {
         TableColumn<UserProfile,String> emailCol   = col("Email",      u -> u.getEmail());
         TableColumn<UserProfile,String> contactCol = col("Contact",    u -> u.getContactNo());
         TableColumn<UserProfile,String> statusCol  = col("Status",     u -> u.getStatus() == null ? "" : u.getStatus());
+        idCol.setMinWidth(140); idCol.setPrefWidth(160);
+        nameCol.setMinWidth(180); nameCol.setPrefWidth(220);
+        emailCol.setMinWidth(200); emailCol.setPrefWidth(240);
+        contactCol.setMinWidth(120); contactCol.setPrefWidth(150);
+        statusCol.setMinWidth(100); statusCol.setPrefWidth(120);
         table.getColumns().addAll(idCol, nameCol, emailCol, contactCol, statusCol);
         table.setPrefHeight(260);
         table.setPlaceholder(new Label("No undergraduates found."));

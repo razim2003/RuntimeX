@@ -22,4 +22,6 @@ public interface UserDao {
     void deleteUser(String userId);
 
     List<UserProfile> findUndergraduates(String keyword);
+
+    void updateUndergraduateStatus(String studentId, String status);
 }

@@ -98,17 +98,48 @@ public class CourseUnitDAO {
 
 
     public boolean deleteCourse(String code) {
-        String sql = "DELETE FROM course_unit WHERE course_code = ?";
+        boolean previousAutoCommit = true;
+        try {
+            previousAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
 
+            deleteByCourse("DELETE FROM medical_attendance WHERE attendance_id IN (\n"
+                    + "    SELECT attendance_id FROM attendance WHERE course_code = ?\n"
+                    + ")", code, false);
+            deleteByCourse("DELETE FROM exam_medical WHERE course_code = ?", code, false);
+            deleteByCourse("DELETE FROM marks WHERE course_code = ?", code, false);
+            deleteByCourse("DELETE FROM attendance WHERE course_code = ?", code, false);
+            deleteByCourse("DELETE FROM course_exam WHERE course_code = ?", code, false);
+            deleteByCourse("DELETE FROM enrollment WHERE course_code = ?", code, false);
+            deleteByCourse("DELETE FROM course_material WHERE course_code = ?", code, true);
+            deleteByCourse("DELETE FROM lecturer_course WHERE course_code = ?", code, false);
+            deleteByCourse("DELETE FROM timetable WHERE course_code = ?", code, false);
+
+            int rows;
+            try (PreparedStatement ps = connection.prepareStatement(
+                    "DELETE FROM course_unit WHERE course_code = ?")) {
+                ps.setString(1, code);
+                rows = ps.executeUpdate();
+            }
+            connection.commit();
+            return rows > 0;
+        } catch (SQLException e) {
+            try { connection.rollback(); } catch (SQLException ignored) {}
+            throw new RuntimeException("Error deleting course: " + e.getMessage(), e);
+        } finally {
+            try { connection.setAutoCommit(previousAutoCommit); } catch (SQLException ignored) {}
+        }
+    }
+
+    private void deleteByCourse(String sql, String code, boolean ignoreMissingTable) throws SQLException {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, code);
-
-            int rows = ps.executeUpdate();
-            return rows > 0;
-
+            ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error deleting course");
+            if (ignoreMissingTable && "42S02".equals(e.getSQLState())) {
+                return;
+            }
+            throw e;
         }
     }
 

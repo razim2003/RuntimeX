@@ -23,14 +23,15 @@ public class NoticeDao {
         n.setDate    (rs.getDate  ("date"));
         n.setFilePath(rs.getString("file_path"));
         n.setFileType(rs.getString("file_type"));
+        n.setAudience(rs.getString("audience"));
         return n;
     }
 
     // ── CREATE ────────────────────────────────────────────────────────────
     public void createNotice(Notice n, String adminId) {
         String sql = """
-                INSERT INTO notice (notice_id, admin_id, title, date, file_path, file_type)
-                VALUES (?,?,?,?,?,?)
+                INSERT INTO notice (notice_id, admin_id, title, date, file_path, file_type, audience)
+                VALUES (?,?,?,?,?,?,?)
                 """;
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, n.getNoticeId());
@@ -39,6 +40,7 @@ public class NoticeDao {
             pst.setDate  (4, new Date(System.currentTimeMillis()));
             pst.setString(5, blankToNull(n.getFilePath()));
             pst.setString(6, blankToNull(n.getFileType()));
+            pst.setString(7, blankToNull(n.getAudience()) == null ? "All" : n.getAudience());
             pst.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error creating notice: " + e.getMessage(), e);
@@ -73,11 +75,50 @@ public class NoticeDao {
         return list;
     }
 
+    // ── READ BY AUDIENCE ────────────────────────────────────────────────
+    public List<Notice> getNoticesForAudience(String audience) {
+        List<Notice> list = new ArrayList<>();
+        String sql = """
+                SELECT * FROM notice
+                WHERE audience = 'All' OR audience = ?
+                ORDER BY date DESC, notice_id DESC
+                """;
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, audience);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) list.add(map(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error loading notices: " + e.getMessage(), e);
+        }
+        return list;
+    }
+
+    public List<Notice> searchNoticesForAudience(String keyword, String audience) {
+        List<Notice> list = new ArrayList<>();
+        String sql = """
+                SELECT * FROM notice
+                WHERE (audience = 'All' OR audience = ?)
+                  AND title LIKE ?
+                ORDER BY date DESC, notice_id DESC
+                """;
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, audience);
+            pst.setString(2, "%" + keyword + "%");
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) list.add(map(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error searching notices: " + e.getMessage(), e);
+        }
+        return list;
+    }
+
     // ── UPDATE (title + optional new file) ───────────────────────────────
     public void updateNotice(Notice n, String adminId) {
         String sql = """
                 UPDATE notice
-                SET title=?, date=?, file_path=?, file_type=?
+                SET title=?, date=?, file_path=?, file_type=?, audience=?
                 WHERE notice_id=? AND admin_id=?
                 """;
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -85,8 +126,9 @@ public class NoticeDao {
             pst.setDate  (2, new Date(System.currentTimeMillis()));
             pst.setString(3, blankToNull(n.getFilePath()));
             pst.setString(4, blankToNull(n.getFileType()));
-            pst.setString(5, n.getNoticeId());
-            pst.setString(6, adminId);
+            pst.setString(5, blankToNull(n.getAudience()) == null ? "All" : n.getAudience());
+            pst.setString(6, n.getNoticeId());
+            pst.setString(7, adminId);
             int rows = pst.executeUpdate();
             if (rows == 0) throw new RuntimeException("Notice not found or no permission to edit.");
         } catch (SQLException e) {

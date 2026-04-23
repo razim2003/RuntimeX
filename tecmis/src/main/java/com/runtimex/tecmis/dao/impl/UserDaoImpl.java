@@ -269,4 +269,21 @@ public class UserDaoImpl implements UserDao {
         }
         return users;
     }
+
+    @Override
+    public void updateUndergraduateStatus(String studentId, String status) {
+        String sql = """
+                INSERT INTO undergraduate (stu_id, status)
+                VALUES (?, ?)
+                ON DUPLICATE KEY UPDATE status = VALUES(status)
+                """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            ps.setString(2, status);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating undergraduate status", e);
+        }
+    }
 }
