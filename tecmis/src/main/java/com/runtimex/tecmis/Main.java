@@ -3,16 +3,19 @@ package com.runtimex.tecmis;
 import com.runtimex.tecmis.dao.AttendanceDao;
 import com.runtimex.tecmis.dao.CourseMaterialDao;
 import com.runtimex.tecmis.dao.CourseUnitDAO;
+import com.runtimex.tecmis.dao.ExamMedicalDao;
 import com.runtimex.tecmis.dao.MedicalDao;
 import com.runtimex.tecmis.dao.MarksDao;
 import com.runtimex.tecmis.dao.NoticeDao;
 import com.runtimex.tecmis.dao.TimetableDao;
 import com.runtimex.tecmis.dao.UserDao;
 import com.runtimex.tecmis.dao.impl.AttendanceDaoImpl;
+import com.runtimex.tecmis.dao.impl.ExamMedicalDaoImpl;
 import com.runtimex.tecmis.dao.impl.MedicalDaoImpl;
 import com.runtimex.tecmis.dao.impl.MarksDaoImpl;
 import com.runtimex.tecmis.dao.impl.UserDaoImpl;
 import com.runtimex.tecmis.services.impl.AttendanceServiceImpl;
+import com.runtimex.tecmis.services.impl.ExamMedicalServiceImpl;
 import com.runtimex.tecmis.services.impl.MarksServiceImpl;
 import com.runtimex.tecmis.ui.TecmisDashboard;
 import com.runtimex.tecmis.utils.DatabaseConnection;
@@ -41,6 +44,7 @@ public class Main extends Application {
             AttendanceDao      attendanceDao   = new AttendanceDaoImpl(connection);
             MedicalDao         medicalDao      = new MedicalDaoImpl(connection);
             MarksDao           marksDao        = new MarksDaoImpl(connection);
+            ExamMedicalDao     examMedicalDao  = new ExamMedicalDaoImpl(connection);
             CourseMaterialDao  materialDao     = new CourseMaterialDao(connection);
             TimetableDao       timetableDao    = new TimetableDao(connection);
             CourseUnitDAO      courseUnitDAO   = new CourseUnitDAO(connection);
@@ -48,9 +52,10 @@ public class Main extends Application {
 
             AttendanceServiceImpl attendanceService = new AttendanceServiceImpl(attendanceDao);
             MarksServiceImpl      marksService      = new MarksServiceImpl(marksDao, attendanceDao);
+            ExamMedicalServiceImpl examMedicalService = new ExamMedicalServiceImpl(examMedicalDao, marksDao);
 
             root = new TecmisDashboard(
-                    userDao, attendanceDao, medicalDao, marksDao, marksService,
+                    userDao, attendanceDao, medicalDao, marksDao, marksService, examMedicalService,
                     materialDao, timetableDao, courseUnitDAO, noticeDao
             ).build();
         }

@@ -120,6 +120,7 @@ CREATE TABLE exam_medical (
     type_id CHAR(4) NOT NULL,
     status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
     submitted_date DATE NOT NULL,
+    proof_image_path VARCHAR(300),
     FOREIGN KEY (stu_id, course_code) REFERENCES enrollment(stu_id, course_code) ON DELETE CASCADE,
     FOREIGN KEY (course_code, type_id) REFERENCES course_exam(course_code, type_id) ON DELETE CASCADE,
     UNIQUE (stu_id, course_code, type_id)
