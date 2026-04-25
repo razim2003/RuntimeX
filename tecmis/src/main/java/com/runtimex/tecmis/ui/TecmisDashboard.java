@@ -10,6 +10,7 @@ import com.runtimex.tecmis.models.*;
 import com.runtimex.tecmis.services.impl.AttendanceServiceImpl;
 import java.awt.Desktop;
 import com.runtimex.tecmis.services.interfaces.MarksService;
+import com.runtimex.tecmis.services.interfaces.ExamMedicalService;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -35,6 +36,7 @@ public class TecmisDashboard {
     private final MedicalDao medicalDao;
     private final MarksDao marksDao;
     private final MarksService marksService;
+    private final ExamMedicalService examMedicalService;
     private final CourseMaterialDao materialDao;
     private final TimetableDao timetableDao;
     private final com.runtimex.tecmis.dao.CourseUnitDAO courseUnitDAO;
@@ -50,6 +52,7 @@ public class TecmisDashboard {
     private final ObservableList<CourseUnit>          courseRows       = FXCollections.observableArrayList();
     private final ObservableList<Notice>              noticeRows       = FXCollections.observableArrayList();
     private final ObservableList<UserProfile>         ugRows           = FXCollections.observableArrayList();
+    private final ObservableList<ExamMedical>         examMedicalRows  = FXCollections.observableArrayList();
 
     private final StackPane root = new StackPane();
     private AuthUser currentUser;
@@ -59,7 +62,7 @@ public class TecmisDashboard {
     // ─────────────────────────────────────────────────────────────────────
 
     public TecmisDashboard(UserDao userDao, AttendanceDao attendanceDao, MedicalDao medicalDao,
-                           MarksDao marksDao, MarksService marksService,
+                           MarksDao marksDao, MarksService marksService, ExamMedicalService examMedicalService,
                            CourseMaterialDao materialDao, TimetableDao timetableDao,
                            com.runtimex.tecmis.dao.CourseUnitDAO courseUnitDAO,
                            com.runtimex.tecmis.dao.NoticeDao noticeDao) {
@@ -68,6 +71,7 @@ public class TecmisDashboard {
         this.medicalDao    = medicalDao;
         this.marksDao      = marksDao;
         this.marksService  = marksService;
+        this.examMedicalService = examMedicalService;
         this.materialDao   = materialDao;
         this.timetableDao  = timetableDao;
         this.courseUnitDAO = courseUnitDAO;
@@ -256,6 +260,7 @@ public class TecmisDashboard {
             list.add(new FeatureCard("🙍", "My Profile",          "Update profile except username/password", this::openMyProfileEditor));
             list.add(new FeatureCard("🗂", "Attendance",          "Add and maintain attendance details",     () -> openAttendance(true, false)));
             list.add(new FeatureCard("🩹", "Medical",             "Add and maintain medical details",        () -> openMedical(true, false)));
+            list.add(new FeatureCard("🧾", "Exam Medical",        "Approve or reject exam medical requests", () -> openExamMedical(true, false)));
             list.add(new FeatureCard("📢", "Notices",             "See notices",                             this::openNoticeBoard));
             list.add(new FeatureCard("🗓", "Department Timetable","See timetables for your department",      this::openTOTimetable));
             return list;
@@ -265,6 +270,7 @@ public class TecmisDashboard {
         list.add(new FeatureCard("🙍", "My Profile",      "Update only contact details and profile picture", this::openMyProfileEditor));
         list.add(new FeatureCard("📋", "My Attendance",   "See your attendance details",                     () -> openAttendance(false, true)));
         list.add(new FeatureCard("🩺", "My Medical",      "See your medical details",                        () -> openMedical(false, true)));
+        list.add(new FeatureCard("📝", "Exam Medical",    "Submit exam medical requests",                    () -> openExamMedical(false, true)));
         list.add(new FeatureCard("📘", "Course Materials","View materials for your enrolled courses",         this::openUndergraduateMaterials));
         list.add(new FeatureCard("📈", "My Grades & GPA", "See your grades and GPA",                         this::openMarksOverview));
         list.add(new FeatureCard("🗓", "My Timetable",    "See your class timetable",                        this::openUndergraduateTimetable));
@@ -1315,6 +1321,153 @@ public class TecmisDashboard {
         else body = new VBox(10, filterBar, table, viewPhotoBtn, selectedPhoto);
         body.setPadding(new Insets(16)); page.setCenter(body);
         root.getChildren().setAll(page); refreshBtn.fire();
+    }
+
+    private void openExamMedical(boolean canManage, boolean selfOnly) {
+        BorderPane page = buildShell("Exam Medical");
+        TableView<ExamMedical> table = new TableView<>(examMedicalRows);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.getColumns().addAll(
+                col("Ref No",     x -> x.getRefNo()),
+                col("Student",    x -> x.getStudentId()),
+                col("Course",     x -> x.getCourseExam() == null ? "-" : x.getCourseExam().getCourseCode()),
+                col("Type",       x -> x.getCourseExam() == null ? "-" : x.getCourseExam().getExamTypeId()),
+                col("Status",     x -> x.getStatus()),
+            col("Submitted",  x -> x.getSubmittedDate()),
+            col("Photo",      x -> x.getProofImagePath() == null ? "-" : x.getProofImagePath()));
+
+        Button refreshBtn = new Button("Refresh");
+        refreshBtn.setOnAction(e -> {
+            try {
+                if (canManage) examMedicalRows.setAll(examMedicalService.getPending());
+                else examMedicalRows.setAll(examMedicalService.getByStudent(currentUser.getId()));
+            } catch (Exception ex) { showError(ex.getMessage()); }
+        });
+
+        VBox body;
+        if (canManage) {
+            ComboBox<String> statusBox = new ComboBox<>();
+            statusBox.getItems().addAll("Approved", "Rejected");
+            statusBox.setValue("Approved");
+            Button updateBtn = new Button("Update Status");
+            updateBtn.setStyle("-fx-background-color: #0ea5e9; -fx-text-fill: white;");
+            updateBtn.setOnAction(e -> {
+                ExamMedical sel = table.getSelectionModel().getSelectedItem();
+                if (sel == null) { showError("Select an exam medical request first"); return; }
+                try {
+                    examMedicalService.updateStatus(sel.getRefNo(), statusBox.getValue());
+                    showInfo("Status updated for " + sel.getRefNo());
+                    refreshBtn.fire();
+                } catch (Exception ex) { showError(ex.getMessage()); }
+            });
+            HBox updateBar = new HBox(8, new Label("New Status:"), statusBox, updateBtn);
+            Button viewPhotoBtn = new Button("View Selected Photo");
+            viewPhotoBtn.setOnAction(e -> {
+                ExamMedical sel = table.getSelectionModel().getSelectedItem();
+                if (sel == null) { showError("Select an exam medical request first"); return; }
+                String path = sel.getProofImagePath();
+                if (path == null || path.isBlank()) { showError("No photo uploaded for selected request"); return; }
+                showMedicalPhoto(path);
+            });
+            body = new VBox(10, refreshBtn, table, updateBar, viewPhotoBtn);
+        } else if (selfOnly) {
+            ComboBox<String> courseBox = new ComboBox<>();
+            courseBox.setPrefWidth(320);
+            ComboBox<CourseExam> examBox = new ComboBox<>();
+            examBox.setPrefWidth(240);
+            examBox.setCellFactory(list -> new ListCell<>() {
+                protected void updateItem(CourseExam item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? null : formatExamLabel(item));
+                }
+            });
+            examBox.setButtonCell(new ListCell<>() {
+                protected void updateItem(CourseExam item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? null : formatExamLabel(item));
+                }
+            });
+            Button loadExamsBtn = new Button("Load Exams");
+            Runnable loadExams = () -> {
+                String code = parseCourseCode(courseBox.getValue() == null ? "" : courseBox.getValue());
+                if (code.isBlank()) { return; }
+                try {
+                    List<CourseExam> exams = marksService.getCourseExams(code);
+                    List<CourseExam> allowed = new ArrayList<>();
+                    for (CourseExam ex : exams) {
+                        String typeId = ex.getExamTypeId();
+                        if ("MID".equals(typeId) || "FIN".equals(typeId) || "ASST".equals(typeId)) allowed.add(ex);
+                    }
+                    examBox.getItems().setAll(allowed);
+                    if (!allowed.isEmpty()) examBox.getSelectionModel().select(0);
+                } catch (Exception ex) { showError(ex.getMessage()); }
+            };
+            loadExamsBtn.setOnAction(e -> {
+                if (courseBox.getValue() == null || parseCourseCode(courseBox.getValue()).isBlank()) {
+                    showError("Select a course first");
+                    return;
+                }
+                loadExams.run();
+                if (examBox.getItems().isEmpty()) showError("No MID/FIN/ASST exams found for this course");
+            });
+            courseBox.setOnAction(e -> loadExams.run());
+
+            TextField proofPath = new TextField();
+            proofPath.setPromptText("Medical proof image path");
+            proofPath.setEditable(false);
+            Button uploadBtn = new Button("Upload Photo");
+            uploadBtn.setOnAction(e -> {
+                FileChooser fc = new FileChooser();
+                fc.setTitle("Select exam medical image");
+                fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Images","*.png","*.jpg","*.jpeg","*.webp"));
+                File file = fc.showOpenDialog(root.getScene() == null ? null : root.getScene().getWindow());
+                if (file != null) proofPath.setText(file.getAbsolutePath());
+            });
+
+            Button submitBtn = new Button("Submit Request");
+            submitBtn.setStyle("-fx-background-color: #16a34a; -fx-text-fill: white;");
+            submitBtn.setOnAction(e -> {
+                String code = parseCourseCode(courseBox.getValue() == null ? "" : courseBox.getValue());
+                CourseExam exam = examBox.getSelectionModel().getSelectedItem();
+                if (code.isBlank() || exam == null) { showError("Select a course and exam"); return; }
+                if (proofPath.getText().isBlank()) { showError("Upload a medical proof image"); return; }
+                try {
+                    examMedicalService.submitMedical(currentUser.getId(), code, exam.getExamTypeId(), proofPath.getText().trim());
+                    showInfo("Exam medical submitted");
+                    proofPath.clear();
+                    refreshBtn.fire();
+                } catch (Exception ex) { showError(ex.getMessage()); }
+            });
+
+            try {
+                courseBox.getItems().clear();
+                for (CourseUnit c : marksService.getCoursesByStudent(currentUser.getId()))
+                    courseBox.getItems().add(c.getCourseCode() + " - " + c.getTitle());
+                if (!courseBox.getItems().isEmpty()) courseBox.getSelectionModel().select(0);
+            } catch (Exception ex) { showError(ex.getMessage()); }
+            loadExams.run();
+
+            Label note = new Label("Only MID, FIN, and ASST exams are allowed for exam medical.");
+            note.setStyle("-fx-text-fill: #475569;");
+            HBox formBar = new HBox(8, new Label("Course:"), courseBox, loadExamsBtn, new Label("Exam:"), examBox, submitBtn);
+            HBox proofBar = new HBox(8, new Label("Photo:"), proofPath, uploadBtn);
+            Button viewPhotoBtn = new Button("View Selected Photo");
+            viewPhotoBtn.setOnAction(e -> {
+                ExamMedical sel = table.getSelectionModel().getSelectedItem();
+                if (sel == null) { showError("Select an exam medical request first"); return; }
+                String path = sel.getProofImagePath();
+                if (path == null || path.isBlank()) { showError("No photo uploaded for selected request"); return; }
+                showMedicalPhoto(path);
+            });
+            body = new VBox(10, formBar, proofBar, note, refreshBtn, table, viewPhotoBtn);
+        } else {
+            body = new VBox(10, refreshBtn, table);
+        }
+
+        body.setPadding(new Insets(16));
+        page.setCenter(body);
+        root.getChildren().setAll(page);
+        refreshBtn.fire();
     }
 
     private void openMarksUpload() {
