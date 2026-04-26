@@ -473,7 +473,7 @@ VALUES (
         'ASST',
         0.20,
         '2026-03-30',
-        'English Assignment'
+        'Assignment'
     ),
     (
         'ENG2122',
