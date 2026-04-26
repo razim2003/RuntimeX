@@ -2,8 +2,7 @@ com\runtimex\tecmis\models\MarkEntry.class
 com\runtimex\tecmis\models\CourseResultSummary.class
 com\runtimex\tecmis\models\StudentInfo.class
 com\runtimex\tecmis\models\AuthUser.class
-com\runtimex\tecmis\ui\TecmisDashboard$5.class
-com\runtimex\tecmis\ui\TecmisDashboard$2.class
+com\runtimex\tecmis\models\EnrollmentRecord.class
 com\runtimex\tecmis\models\AttendanceRecord.class
 com\runtimex\tecmis\models\TechnicalOfficer.class
 com\runtimex\tecmis\services\interfaces\AttendanceService.class
@@ -15,16 +14,13 @@ com\runtimex\tecmis\models\AttendanceSummary.class
 com\runtimex\tecmis\ui\TecmisDashboard.class
 com\runtimex\tecmis\dao\TimetableDao.class
 com\runtimex\tecmis\models\CourseMaterial.class
-com\runtimex\tecmis\ui\TecmisDashboard$FeatureCard.class
 com\runtimex\tecmis\models\MedicalRecord.class
 com\runtimex\tecmis\dao\UserDao.class
-com\runtimex\tecmis\ui\TecmisDashboard$1.class
 com\runtimex\tecmis\models\CourseExam.class
 com\runtimex\tecmis\services\interfaces\MarksService.class
 com\runtimex\tecmis\dao\impl\ExamMedicalDaoImpl.class
 com\runtimex\tecmis\dao\AttendanceDao.class
 com\runtimex\tecmis\dao\impl\MarksDaoImpl.class
-com\runtimex\tecmis\ui\TecmisDashboard$4.class
 com\runtimex\tecmis\services\impl\AttendanceServiceImpl.class
 com\runtimex\tecmis\services\impl\ExamMedicalServiceImpl.class
 com\runtimex\tecmis\models\ExamMedical.class
@@ -33,8 +29,8 @@ com\runtimex\tecmis\dao\NoticeDao.class
 com\runtimex\tecmis\dao\CourseUnitDAO.class
 com\runtimex\tecmis\dao\ExamMedicalDao.class
 com\runtimex\tecmis\models\StudentGpaSummary.class
-com\runtimex\tecmis\ui\TecmisDashboard$3.class
 com\runtimex\tecmis\services\impl\MarksServiceImpl.class
+com\runtimex\tecmis\dao\EnrollmentDao.class
 com\runtimex\tecmis\models\UserProfile.class
 com\runtimex\tecmis\dao\MedicalDao.class
 com\runtimex\tecmis\dao\MarksDao.class
@@ -42,6 +38,5 @@ com\runtimex\tecmis\dao\impl\UserDaoImpl.class
 com\runtimex\tecmis\models\Timetable.class
 com\runtimex\tecmis\dao\impl\AttendanceDaoImpl.class
 com\runtimex\tecmis\models\Mark.class
-com\runtimex\tecmis\ui\TecmisDashboard$6.class
 com\runtimex\tecmis\Main.class
 com\runtimex\tecmis\models\Notice.class
