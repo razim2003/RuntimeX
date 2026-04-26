@@ -1,0 +1,85 @@
+-------------------------------------------------------------------------------
+Test set: com.runtimex.tecmis.TimetableDaoTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 1, Errors: 3, Skipped: 0, Time elapsed: 0.092 s <<< FAILURE! -- in com.runtimex.tecmis.TimetableDaoTest
+com.runtimex.tecmis.TimetableDaoTest.testAddSession_Success -- Time elapsed: 0.022 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Unexpected exception thrown: java.lang.RuntimeException: Error adding timetable session
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertDoesNotThrow.createAssertionFailedError(AssertDoesNotThrow.java:84)
+	at org.junit.jupiter.api.AssertDoesNotThrow.assertDoesNotThrow(AssertDoesNotThrow.java:53)
+	at org.junit.jupiter.api.AssertDoesNotThrow.assertDoesNotThrow(AssertDoesNotThrow.java:36)
+	at org.junit.jupiter.api.Assertions.assertDoesNotThrow(Assertions.java:3168)
+	at com.runtimex.tecmis.TimetableDaoTest.testAddSession_Success(TimetableDaoTest.java:68)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+Caused by: java.lang.RuntimeException: Error adding timetable session
+	at com.runtimex.tecmis.dao.TimetableDao.addSession(TimetableDao.java:50)
+	at com.runtimex.tecmis.TimetableDaoTest.lambda$testAddSession_Success$0(TimetableDaoTest.java:68)
+	at org.junit.jupiter.api.AssertDoesNotThrow.assertDoesNotThrow(AssertDoesNotThrow.java:49)
+	... 6 more
+Caused by: java.sql.SQLException: Data truncated for column 'type' at row 1
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:130)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeInternal(ClientPreparedStatement.java:916)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1061)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1009)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1320)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:994)
+	at com.runtimex.tecmis.dao.TimetableDao.addSession(TimetableDao.java:48)
+	... 8 more
+
+com.runtimex.tecmis.TimetableDaoTest.testViewTimetable_ReturnsInserted -- Time elapsed: 0.005 s <<< ERROR!
+java.lang.RuntimeException: Error adding timetable session
+	at com.runtimex.tecmis.dao.TimetableDao.addSession(TimetableDao.java:50)
+	at com.runtimex.tecmis.TimetableDaoTest.testViewTimetable_ReturnsInserted(TimetableDaoTest.java:76)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+Caused by: java.sql.SQLException: Data truncated for column 'type' at row 1
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:130)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeInternal(ClientPreparedStatement.java:916)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1061)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1009)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1320)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:994)
+	at com.runtimex.tecmis.dao.TimetableDao.addSession(TimetableDao.java:48)
+	... 4 more
+
+com.runtimex.tecmis.TimetableDaoTest.testUpdateSession_Success -- Time elapsed: 0.008 s <<< ERROR!
+java.lang.RuntimeException: Error adding timetable session
+	at com.runtimex.tecmis.dao.TimetableDao.addSession(TimetableDao.java:50)
+	at com.runtimex.tecmis.TimetableDaoTest.testUpdateSession_Success(TimetableDaoTest.java:88)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+Caused by: java.sql.SQLException: Data truncated for column 'type' at row 1
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:130)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeInternal(ClientPreparedStatement.java:916)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1061)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1009)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1320)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:994)
+	at com.runtimex.tecmis.dao.TimetableDao.addSession(TimetableDao.java:48)
+	... 4 more
+
+com.runtimex.tecmis.TimetableDaoTest.testDeleteSession_Success -- Time elapsed: 0.004 s <<< ERROR!
+java.lang.RuntimeException: Error adding timetable session
+	at com.runtimex.tecmis.dao.TimetableDao.addSession(TimetableDao.java:50)
+	at com.runtimex.tecmis.TimetableDaoTest.testDeleteSession_Success(TimetableDaoTest.java:116)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+Caused by: java.sql.SQLException: Data truncated for column 'type' at row 1
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:130)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeInternal(ClientPreparedStatement.java:916)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1061)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1009)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1320)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:994)
+	at com.runtimex.tecmis.dao.TimetableDao.addSession(TimetableDao.java:48)
+	... 4 more
+

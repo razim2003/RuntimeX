@@ -6,6 +6,7 @@ E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\TimetableD
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\CourseUnitDAO.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\impl\MarksDaoImpl.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\StudentGpaSummary.java
+E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\EnrollmentRecord.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\CourseExam.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\NoticeDao.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\MedicalRecord.java
@@ -15,23 +16,21 @@ E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\impl\Atten
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\StudentInfo.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\services\impl\AttendanceServiceImpl.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\services\interfaces\ExamMedicalService.java
-E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\BlogDao.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\services\interfaces\MarksService.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\TechnicalOfficer.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Notice.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\Main.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\AttendanceSummary.java
-E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Blog.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\CourseMaterial.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\AttendanceRecord.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\services\impl\MarksServiceImpl.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\MarkEntry.java
-E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\EventDAO.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\CourseUnit.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\CourseMaterialDao.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\UserProfile.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\UserDao.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\ExamMedical.java
+E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\EnrollmentDao.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\impl\UserDaoImpl.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\services\impl\ExamMedicalServiceImpl.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Mark.java
@@ -41,4 +40,3 @@ E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\impl\Medic
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\AuthUser.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\MarksDao.java
 E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\dao\impl\ExamMedicalDaoImpl.java
-E:\java project\RuntimeX\tecmis\src\main\java\com\runtimex\tecmis\models\Event.java

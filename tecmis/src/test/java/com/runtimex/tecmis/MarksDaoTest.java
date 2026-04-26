@@ -41,8 +41,8 @@ public class MarksDaoTest {
         VALUES ('TG/TST/0001', 'Test', 'Student', 'test@test.lk', '0700000000', 'testhash', 'Undergraduate')
     """);
         conn.createStatement().execute("""
-        INSERT IGNORE INTO undergraduate (stu_id, status, mentor_id)
-        VALUES ('TG/TST/0001', 'Proper', 'LEC001')
+        INSERT IGNORE INTO undergraduate (stu_id, status)
+        VALUES ('TG/TST/0001', 'Proper')
     """);
         conn.createStatement().execute("""
         INSERT IGNORE INTO enrollment (stu_id, course_code)

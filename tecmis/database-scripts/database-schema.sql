@@ -33,10 +33,7 @@ CREATE TABLE technical_officer (
 CREATE TABLE undergraduate (
     stu_id CHAR(12) PRIMARY KEY,
     status ENUM('Proper', 'Repeat', 'Suspended') DEFAULT 'Proper',
-    mentor_id CHAR(12),
-    FOREIGN KEY (stu_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (mentor_id) REFERENCES lecturer(lec_id) ON DELETE
-    SET NULL
+    FOREIGN KEY (stu_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE TABLE course_unit (
     course_code CHAR(7) PRIMARY KEY,
@@ -135,21 +132,6 @@ CREATE TABLE notice (
     audience ENUM('All','Admin','Lecturer','TechnicalOfficer','Undergraduate') NOT NULL DEFAULT 'All',
     FOREIGN KEY (admin_id) REFERENCES admin(admin_id)
 );
-CREATE TABLE blog (
-    blog_id CHAR(12) PRIMARY KEY,
-    user_id CHAR(12),
-    title VARCHAR(255) NOT NULL,
-    date DATE NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-CREATE TABLE notification (
-    notification_id CHAR(12) PRIMARY KEY,
-    admin_id CHAR(12) NOT NULL,
-    message VARCHAR(255) NOT NULL,
-    date DATE NOT NULL,
-    status ENUM('Active', 'Inactive') DEFAULT 'Active',
-    FOREIGN KEY (admin_id) REFERENCES admin(admin_id) ON DELETE CASCADE
-);
 CREATE TABLE timetable (
     timetable_id CHAR(12) PRIMARY KEY,
     admin_id CHAR(12),
@@ -163,15 +145,6 @@ CREATE TABLE timetable (
     FOREIGN KEY (lec_id) REFERENCES lecturer(lec_id) ON DELETE
     SET NULL,
         FOREIGN KEY (course_code) REFERENCES course_unit(course_code) ON DELETE CASCADE
-);
-CREATE TABLE event_cal (
-    event_id CHAR(12) PRIMARY KEY,
-    user_id CHAR(12) NOT NULL,
-    title VARCHAR(100) NOT NULL,
-    description TEXT,
-    date DATE NOT NULL,
-    time TIME NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE TABLE lecturer_course (
     lec_id CHAR(12),
