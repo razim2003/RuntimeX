@@ -2,6 +2,7 @@ package com.runtimex.tecmis.ui;
 
 import com.runtimex.tecmis.dao.AttendanceDao;
 import com.runtimex.tecmis.dao.CourseMaterialDao;
+import com.runtimex.tecmis.dao.EnrollmentDao;
 import com.runtimex.tecmis.dao.MedicalDao;
 import com.runtimex.tecmis.dao.MarksDao;
 import com.runtimex.tecmis.dao.TimetableDao;
@@ -23,13 +24,22 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
+import javafx.embed.swing.SwingFXUtils;
 
 import java.io.File;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.awt.image.BufferedImage;
+import java.net.URL;
+import javax.imageio.ImageIO;
 
 public class TecmisDashboard {
+
+    private static final String LOGO_RESOURCE = "/com/runtimex/tecmis/ui/university-logo.jfif";
+    private static final int LOGO_LG = 64;
+    private static final int LOGO_SM = 28;
 
     private final UserDao userDao;
     private final AttendanceDao attendanceDao;
@@ -41,6 +51,7 @@ public class TecmisDashboard {
     private final TimetableDao timetableDao;
     private final com.runtimex.tecmis.dao.CourseUnitDAO courseUnitDAO;
     private final com.runtimex.tecmis.dao.NoticeDao noticeDao;
+    private final EnrollmentDao enrollmentDao;
 
     private final ObservableList<UserProfile>         userRows         = FXCollections.observableArrayList();
     private final ObservableList<AttendanceRecord>    attendanceRows   = FXCollections.observableArrayList();
@@ -53,6 +64,7 @@ public class TecmisDashboard {
     private final ObservableList<Notice>              noticeRows       = FXCollections.observableArrayList();
     private final ObservableList<UserProfile>         ugRows           = FXCollections.observableArrayList();
     private final ObservableList<ExamMedical>         examMedicalRows  = FXCollections.observableArrayList();
+    private final ObservableList<EnrollmentRecord>    enrollmentRows   = FXCollections.observableArrayList();
 
     private final StackPane root = new StackPane();
     private AuthUser currentUser;
@@ -65,7 +77,8 @@ public class TecmisDashboard {
                            MarksDao marksDao, MarksService marksService, ExamMedicalService examMedicalService,
                            CourseMaterialDao materialDao, TimetableDao timetableDao,
                            com.runtimex.tecmis.dao.CourseUnitDAO courseUnitDAO,
-                           com.runtimex.tecmis.dao.NoticeDao noticeDao) {
+                           com.runtimex.tecmis.dao.NoticeDao noticeDao,
+                           EnrollmentDao enrollmentDao) {
         this.userDao       = userDao;
         this.attendanceDao = attendanceDao;
         this.medicalDao    = medicalDao;
@@ -76,6 +89,7 @@ public class TecmisDashboard {
         this.timetableDao  = timetableDao;
         this.courseUnitDAO = courseUnitDAO;
         this.noticeDao     = noticeDao;
+        this.enrollmentDao = enrollmentDao;
     }
 
     public Parent build() {
@@ -89,21 +103,24 @@ public class TecmisDashboard {
 
     private void showLogin() {
         BorderPane page = new BorderPane();
-        page.setStyle("-fx-background-color: linear-gradient(to bottom right, #0f172a, #1f2937);");
+        page.getStyleClass().add("page-bg");
 
         VBox card = new VBox(12);
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(28));
         card.setMaxWidth(420);
-        card.setStyle("-fx-background-color: #111827; -fx-background-radius: 16; -fx-border-radius: 16;"
-                + "-fx-border-color: #334155; -fx-border-width: 1;");
+        card.getStyleClass().add("login-card");
 
         Label heading = new Label("TecMIS Login");
-        heading.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #f8fafc;");
+        heading.getStyleClass().add("section-title");
 
         Label sub = new Label("Role-based access for User, Attendance, Medical, Course Materials and Timetable");
         sub.setWrapText(true);
-        sub.setStyle("-fx-text-fill: #cbd5e1;");
+        sub.getStyleClass().add("section-subtitle");
+
+        VBox titleBox = new VBox(4, heading, sub);
+        HBox brandRow = new HBox(12, buildLogo(LOGO_LG), titleBox);
+        brandRow.setAlignment(Pos.CENTER_LEFT);
 
         TextField userIdField = new TextField();
         userIdField.setPromptText("User ID (e.g. AD001, LEC001, TO001, TG/2023/1780)");
@@ -112,10 +129,10 @@ public class TecmisDashboard {
         passwordField.setPromptText("Password");
 
         Label note = new Label("Demo tip: use password 1234 for seeded users");
-        note.setStyle("-fx-text-fill: #94a3b8;");
+        note.getStyleClass().add("muted");
 
         Button loginBtn = new Button("🔐 Login");
-        loginBtn.setStyle("-fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-weight: bold;");
+        loginBtn.getStyleClass().addAll("button", "primary");
 
         loginBtn.setOnAction(e -> {
             String userId   = userIdField.getText().trim();
@@ -129,7 +146,7 @@ public class TecmisDashboard {
             } catch (Exception ex) { showError(ex.getMessage()); }
         });
 
-        card.getChildren().addAll(heading, sub, userIdField, passwordField, loginBtn, note);
+        card.getChildren().addAll(brandRow, userIdField, passwordField, loginBtn, note);
         StackPane center = new StackPane(card);
         center.setPadding(new Insets(24));
         page.setCenter(center);
@@ -157,29 +174,32 @@ public class TecmisDashboard {
 
     private BorderPane buildShell(String section) {
         BorderPane page = new BorderPane();
-        page.setStyle("-fx-background-color: linear-gradient(to bottom right, #e2e8f0, #cbd5e1);");
+        page.getStyleClass().add("page-bg");
 
         HBox topBar = new HBox(10);
         topBar.setAlignment(Pos.CENTER_LEFT);
         topBar.setPadding(new Insets(12));
-        topBar.setStyle("-fx-background-color: #0f172a;");
+        topBar.getStyleClass().add("topbar");
 
         Label title   = new Label("TecMIS");
-        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #f8fafc;");
+        title.getStyleClass().add("topbar-title");
         Label sec     = new Label("| " + section);
-        sec.setStyle("-fx-font-size: 15px; -fx-text-fill: #bfdbfe;");
+        sec.getStyleClass().add("topbar-section");
         Label userInfo = new Label(currentUser.getFullName() + "  (" + currentUser.getUserType() + ")");
-        userInfo.setStyle("-fx-text-fill: #cbd5e1;");
+        userInfo.getStyleClass().add("topbar-user");
 
         Region gap = new Region(); HBox.setHgrow(gap, Priority.ALWAYS);
 
         Button homeBtn   = new Button("🏠 Home");
         homeBtn.setOnAction(e -> showHome());
         Button logoutBtn = new Button("⏻ Logout");
-        logoutBtn.setStyle("-fx-background-color: #dc2626; -fx-text-fill: white;");
+        logoutBtn.getStyleClass().addAll("button", "danger");
         logoutBtn.setOnAction(e -> { currentUser = null; showLogin(); });
 
-        topBar.getChildren().addAll(title, sec, gap, buildTopBarAvatar(), userInfo, homeBtn, logoutBtn);
+        HBox brand = new HBox(8, buildLogo(LOGO_SM), title);
+        brand.setAlignment(Pos.CENTER_LEFT);
+
+        topBar.getChildren().addAll(brand, sec, gap, buildTopBarAvatar(), userInfo, homeBtn, logoutBtn);
         page.setTop(topBar);
         return page;
     }
@@ -210,20 +230,78 @@ public class TecmisDashboard {
         return avatar;
     }
 
+    private boolean isValidEmail(String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        return value.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+    }
+
+    private boolean isValidPhone(String value) {
+        if (value == null) {
+            return false;
+        }
+        String digits = value.replaceAll("\\D", "");
+        return digits.length() >= 10;
+    }
+
     private VBox card(String title, String description, Runnable action) {
         VBox box = new VBox(8);
         box.setPadding(new Insets(14)); box.setMinHeight(130);
-        box.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 14;"
-                + "-fx-border-color: #94a3b8; -fx-border-radius: 14; -fx-border-width: 1;");
+        box.getStyleClass().add("card");
         Label t = new Label(title);
-        t.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+        t.getStyleClass().add("card-title");
         Label d = new Label(description); d.setWrapText(true);
-        d.setStyle("-fx-text-fill: #334155;");
+        d.getStyleClass().add("card-body");
         Button open = new Button("Open");
-        open.setStyle("-fx-background-color: #0ea5e9; -fx-text-fill: white;");
+        open.getStyleClass().addAll("button", "primary");
         open.setOnAction(e -> action.run());
         box.getChildren().addAll(t, d, open);
         return box;
+    }
+
+    private StackPane buildLogo(int size) {
+        StackPane logo = new StackPane();
+        logo.getStyleClass().add("logo-badge");
+        logo.setPrefSize(size, size);
+        logo.setMinSize(size, size);
+        logo.setMaxSize(size, size);
+
+        Image image = loadLogoImage(size);
+        if (image != null && !image.isError()) {
+            ImageView iv = new ImageView(image);
+            iv.setFitWidth(size);
+            iv.setFitHeight(size);
+            iv.setPreserveRatio(true);
+            logo.getChildren().add(iv);
+        } else {
+            Label fallback = new Label("UNI");
+            fallback.getStyleClass().add("logo-fallback");
+            logo.getChildren().add(fallback);
+        }
+        return logo;
+    }
+
+    private Image loadLogoImage(int size) {
+        try {
+            URL resource = getClass().getResource(LOGO_RESOURCE);
+            if (resource == null) {
+                return null;
+            }
+            Image image = new Image(resource.toExternalForm(), size, size, true, true);
+            if (image != null && !image.isError()) {
+                return image;
+            }
+            try (InputStream in = resource.openStream()) {
+                BufferedImage buffered = ImageIO.read(in);
+                if (buffered == null) {
+                    return null;
+                }
+                return SwingFXUtils.toFXImage(buffered, null);
+            }
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -237,6 +315,7 @@ public class TecmisDashboard {
             list.add(new FeatureCard("🙍", "My Profile",    "Update profile picture and contact details", this::openMyProfileEditor));
             list.add(new FeatureCard("👥", "User Profiles", "Create and maintain user profiles",           this::openUserManagement));
             list.add(new FeatureCard("📚", "Courses",       "Create and maintain course details",          this::openCourseManagement));
+            list.add(new FeatureCard("🧾", "Enrollments",   "Enroll students to courses",                   this::openEnrollmentManagement));
             list.add(new FeatureCard("📢", "Notices",       "Create and maintain notices",                 this::openNoticeManagement));
             list.add(new FeatureCard("📰", "Notice Board",  "See notices",                                  this::openNoticeBoard));
             list.add(new FeatureCard("🗓", "Timetables",    "Create and maintain timetables",              this::openAdminTimetable));
@@ -950,8 +1029,12 @@ public class TecmisDashboard {
         updateBtn.setOnAction(e -> {
             UserProfile sel = table.getSelectionModel().getSelectedItem();
             if (sel == null) { showError("Select a user first"); return; }
+            String emailValue = emailEdit.getText().trim();
+            String contactValue = contactEdit.getText().trim();
+            if (!isValidEmail(emailValue)) { showError("Enter a valid email address"); return; }
+            if (!isValidPhone(contactValue)) { showError("Contact number must have at least 10 digits"); return; }
             try {
-                userDao.updateUserContact(sel.getId(), emailEdit.getText().trim(), contactEdit.getText().trim());
+                userDao.updateUserContact(sel.getId(), emailValue, contactValue);
                 showInfo("Contact updated successfully");
                 loadBtn.fire();
             } catch (Exception ex) { showError(ex.getMessage()); }
@@ -1032,6 +1115,8 @@ public class TecmisDashboard {
                 showError("All fields are required to create a user.");
                 return;
             }
+            if (!isValidEmail(em)) { showError("Enter a valid email address"); return; }
+            if (!isValidPhone(cn)) { showError("Contact number must have at least 10 digits"); return; }
             try {
                 userDao.createUser(id, fn, ln, em, cn, pw, tp);
                 if ("Undergraduate".equals(tp)) {
@@ -1096,6 +1181,8 @@ public class TecmisDashboard {
     }
 
     private void saveMyProfile(String email, String contact, String profileImagePath) {
+        if (!isValidEmail(email)) { showError("Enter a valid email address"); return; }
+        if (!isValidPhone(contact)) { showError("Contact number must have at least 10 digits"); return; }
         try { userDao.updateMyProfile(currentUser.getId(), email, contact, profileImagePath); showInfo("Profile updated"); }
         catch (Exception ex) { showError(ex.getMessage()); }
     }
@@ -1758,6 +1845,110 @@ public class TecmisDashboard {
     }
 
     // ═════════════════════════════════════════════════════════════════════
+    // ── ENROLLMENT MANAGEMENT (Admin) ───────────────────────────────────
+    // ═════════════════════════════════════════════════════════════════════
+
+    private void openEnrollmentManagement() {
+        BorderPane page = buildShell("Enrollment Management");
+
+        TextField filterField = new TextField();
+        filterField.setPromptText("Filter by student id/name or course code/title");
+        filterField.setPrefWidth(320);
+        Button refreshBtn = new Button("🔄 Refresh");
+
+        TableView<EnrollmentRecord> table = new TableView<>(enrollmentRows);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        TableColumn<EnrollmentRecord,String> stuIdCol = col("Student ID", EnrollmentRecord::getStudentId);
+        TableColumn<EnrollmentRecord,String> stuNameCol = col("Student Name", EnrollmentRecord::getStudentName);
+        TableColumn<EnrollmentRecord,String> courseCol = col("Course", EnrollmentRecord::getCourseCode);
+        TableColumn<EnrollmentRecord,String> titleCol = col("Course Title", EnrollmentRecord::getCourseTitle);
+        table.getColumns().addAll(stuIdCol, stuNameCol, courseCol, titleCol);
+        table.setPrefHeight(260);
+
+        ComboBox<String> studentBox = new ComboBox<>();
+        studentBox.setPromptText("Select student");
+        studentBox.setPrefWidth(320);
+        ComboBox<String> courseBox = new ComboBox<>();
+        courseBox.setPromptText("Select course");
+        courseBox.setPrefWidth(320);
+
+        Button enrollBtn = new Button("✅ Enroll");
+        enrollBtn.setStyle("-fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-weight: bold;");
+        Button removeBtn = new Button("🗑 Remove Selected");
+        removeBtn.setStyle("-fx-background-color: #dc2626; -fx-text-fill: white;");
+
+        Runnable loadStudents = () -> {
+            try {
+                studentBox.getItems().clear();
+                for (UserProfile u : userDao.findUndergraduates("")) {
+                    studentBox.getItems().add(u.getId() + " - " + u.getFullName());
+                }
+                if (!studentBox.getItems().isEmpty()) studentBox.getSelectionModel().select(0);
+            } catch (Exception ex) { showError(ex.getMessage()); }
+        };
+
+        Runnable loadCourses = () -> {
+            try {
+                courseBox.getItems().clear();
+                for (CourseUnit c : courseUnitDAO.getAllCourses()) {
+                    courseBox.getItems().add(c.getCourseCode() + " - " + c.getTitle());
+                }
+                if (!courseBox.getItems().isEmpty()) courseBox.getSelectionModel().select(0);
+            } catch (Exception ex) { showError(ex.getMessage()); }
+        };
+
+        Runnable reloadAll = () -> {
+            try {
+                enrollmentRows.setAll(enrollmentDao.findEnrollments(filterField.getText().trim()));
+            } catch (Exception ex) { showError(ex.getMessage()); }
+        };
+
+        refreshBtn.setOnAction(e -> reloadAll.run());
+
+        enrollBtn.setOnAction(e -> {
+            String student = parseStudentId(studentBox.getValue());
+            String course = parseCourseCode(courseBox.getValue() == null ? "" : courseBox.getValue());
+            if (student.isBlank() || course.isBlank()) { showError("Select both student and course"); return; }
+            try {
+                enrollmentDao.enrollStudent(student, course);
+                showInfo("Enrolled " + student + " to " + course);
+                reloadAll.run();
+            } catch (Exception ex) { showError(ex.getMessage()); }
+        });
+
+        removeBtn.setOnAction(e -> {
+            EnrollmentRecord sel = table.getSelectionModel().getSelectedItem();
+            if (sel == null) { showError("Select an enrollment row first"); return; }
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                    "Remove enrollment for " + sel.getStudentId() + " in " + sel.getCourseCode() + "?",
+                    ButtonType.YES, ButtonType.NO);
+            confirm.setTitle("Confirm Remove");
+            confirm.showAndWait().ifPresent(bt -> {
+                if (bt == ButtonType.YES) {
+                    try {
+                        enrollmentDao.removeEnrollment(sel.getStudentId(), sel.getCourseCode());
+                        showInfo("Enrollment removed");
+                        reloadAll.run();
+                    } catch (Exception ex) { showError(ex.getMessage()); }
+                }
+            });
+        });
+
+        HBox filterBar = new HBox(8, filterField, refreshBtn);
+        filterBar.setAlignment(Pos.CENTER_LEFT);
+        HBox enrollBar = new HBox(8, studentBox, courseBox, enrollBtn, removeBtn);
+        enrollBar.setAlignment(Pos.CENTER_LEFT);
+
+        VBox layout = new VBox(10, filterBar, table, new Separator(), enrollBar);
+        layout.setPadding(new Insets(14));
+        page.setCenter(new ScrollPane(layout));
+        root.getChildren().setAll(page);
+        loadStudents.run();
+        loadCourses.run();
+        reloadAll.run();
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
     // ── NOTICE MANAGEMENT (Admin) ─────────────────────────────────────────
     // ═════════════════════════════════════════════════════════════════════
 
@@ -2212,6 +2403,12 @@ public class TecmisDashboard {
     private String parseCourseCode(String display) {
         int idx = display.indexOf(" - ");
         return idx <= 0 ? display : display.substring(0, idx).trim();
+    }
+
+    private String parseStudentId(String display) {
+        if (display == null) return "";
+        int idx = display.indexOf(" - ");
+        return idx <= 0 ? display.trim() : display.substring(0, idx).trim();
     }
 
     private String generateMedicalRefNo() {

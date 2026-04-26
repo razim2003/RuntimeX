@@ -4,6 +4,7 @@ import com.runtimex.tecmis.dao.AttendanceDao;
 import com.runtimex.tecmis.dao.CourseMaterialDao;
 import com.runtimex.tecmis.dao.CourseUnitDAO;
 import com.runtimex.tecmis.dao.ExamMedicalDao;
+import com.runtimex.tecmis.dao.EnrollmentDao;
 import com.runtimex.tecmis.dao.MedicalDao;
 import com.runtimex.tecmis.dao.MarksDao;
 import com.runtimex.tecmis.dao.NoticeDao;
@@ -49,6 +50,7 @@ public class Main extends Application {
             TimetableDao       timetableDao    = new TimetableDao(connection);
             CourseUnitDAO      courseUnitDAO   = new CourseUnitDAO(connection);
             NoticeDao          noticeDao       = new NoticeDao(connection);
+            EnrollmentDao      enrollmentDao   = new EnrollmentDao(connection);
 
             AttendanceServiceImpl attendanceService = new AttendanceServiceImpl(attendanceDao);
             MarksServiceImpl      marksService      = new MarksServiceImpl(marksDao, attendanceDao);
@@ -56,11 +58,15 @@ public class Main extends Application {
 
             root = new TecmisDashboard(
                     userDao, attendanceDao, medicalDao, marksDao, marksService, examMedicalService,
-                    materialDao, timetableDao, courseUnitDAO, noticeDao
+                    materialDao, timetableDao, courseUnitDAO, noticeDao, enrollmentDao
             ).build();
         }
 
         Scene scene = new Scene(root, 1300, 760);
+        java.net.URL stylesheet = getClass().getResource("/com/runtimex/tecmis/ui/tecmis.css");
+        if (stylesheet != null) {
+            scene.getStylesheets().add(stylesheet.toExternalForm());
+        }
         primaryStage.setTitle("TecMIS - RuntimeX");
         primaryStage.setScene(scene);
         primaryStage.show();

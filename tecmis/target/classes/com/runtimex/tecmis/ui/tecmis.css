@@ -1,0 +1,96 @@
+.root {
+    -fx-font-family: "Segoe UI";
+}
+
+.page-bg {
+    -fx-background-color: linear-gradient(to bottom right, #e2e8f0, #cbd5e1);
+}
+
+.login-card {
+    -fx-background-color: #0f172a;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: #334155;
+    -fx-border-width: 1;
+}
+
+.section-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f8fafc;
+}
+
+.section-subtitle {
+    -fx-text-fill: #cbd5e1;
+}
+
+.muted {
+    -fx-text-fill: #94a3b8;
+}
+
+.topbar {
+    -fx-background-color: #0f172a;
+}
+
+.topbar-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f8fafc;
+}
+
+.topbar-section {
+    -fx-font-size: 15px;
+    -fx-text-fill: #bfdbfe;
+}
+
+.topbar-user {
+    -fx-text-fill: #cbd5e1;
+}
+
+.logo-badge {
+    -fx-background-color: #0b1220;
+    -fx-border-color: #334155;
+    -fx-border-radius: 999;
+    -fx-background-radius: 999;
+    -fx-alignment: center;
+}
+
+.logo-fallback {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14;
+    -fx-border-color: #94a3b8;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+}
+
+.card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.card-body {
+    -fx-text-fill: #334155;
+}
+
+.button {
+    -fx-background-radius: 8;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.button.primary {
+    -fx-background-color: #0ea5e9;
+    -fx-text-fill: #ffffff;
+}
+
+.button.danger {
+    -fx-background-color: #dc2626;
+    -fx-text-fill: #ffffff;
+}

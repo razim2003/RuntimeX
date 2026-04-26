@@ -286,11 +286,11 @@ VALUES ('TO001'),
     ('TO002'),
     ('TO003'),
     ('TO004');
-INSERT INTO undergraduate (stu_id, status, mentor_id)
-VALUES ('TG/2023/1780', 'Proper', 'LEC001'),
-    ('TG/2023/1781', 'Proper', 'LEC001'),
-    ('TG/2022/1785', 'Repeat', 'LEC001'),
-    ('TG/2021/1790', 'Suspended', 'LEC001');
+INSERT INTO undergraduate (stu_id, status)
+VALUES ('TG/2023/1780', 'Proper'),
+    ('TG/2023/1781', 'Proper'),
+    ('TG/2022/1785', 'Repeat'),
+    ('TG/2021/1790', 'Suspended');
 INSERT INTO course_unit (course_code, title, credit)
 VALUES (
         'ICT2142',
@@ -1923,117 +1923,6 @@ VALUES (
         'Final Project Submission Guidelines',
         '2026-04-10'
     );
-INSERT INTO blog (blog_id, user_id, title, date)
-VALUES (
-        'BLG001',
-        'LEC001',
-        'Introduction to Object Oriented Programming',
-        '2026-03-25'
-    ),
-    (
-        'BLG002',
-        'LEC002',
-        'Database Normalization Explained',
-        '2026-03-26'
-    ),
-    (
-        'BLG003',
-        'LEC003',
-        'Tips for Data Structures Exam',
-        '2026-03-27'
-    ),
-    (
-        'BLG004',
-        'LEC004',
-        'How to Improve Coding Skills',
-        '2026-03-28'
-    ),
-    (
-        'BLG005',
-        'LEC005',
-        'Software Engineering Best Practices',
-        '2026-03-29'
-    ),
-    (
-        'BLG006',
-        'TG/2023/1780',
-        'My First Programming Project',
-        '2026-03-30'
-    ),
-    (
-        'BLG007',
-        'TG/2023/1781',
-        'How I Study for Exams',
-        '2026-03-31'
-    ),
-    (
-        'BLG008',
-        'TG/2023/1782',
-        'Campus Life Experience',
-        '2026-04-01'
-    ),
-    (
-        'BLG009',
-        'TG/2022/1785',
-        'Challenges in Final Year Projects',
-        '2026-04-02'
-    ),
-    (
-        'BLG010',
-        'AD001',
-        'System Maintenance Update',
-        '2026-04-03'
-    );
-INSERT INTO notification (notification_id, admin_id, message, date, status)
-VALUES (
-        'NOT001',
-        'AD001',
-        'System maintenance will be held on 12th April',
-        '2026-04-01',
-        'Active'
-    ),
-    (
-        'NOT002',
-        'AD001',
-        'New semester registration is now open',
-        '2026-04-02',
-        'Active'
-    ),
-    (
-        'NOT003',
-        'AD001',
-        'Lecture cancellation due to public holiday',
-        '2026-04-03',
-        'Inactive'
-    ),
-    (
-        'NOT004',
-        'AD001',
-        'Mid exam timetable has been published',
-        '2026-04-05',
-        'Active'
-    ),
-    (
-        'NOT005',
-        'AD001',
-        'Attendance below 75% will be restricted',
-        '2026-04-06',
-        'Active'
-    ),
-    (
-        'NOT006',
-        'AD001',
-        'Library will be closed for renovation',
-        '2026-04-07',
-        'Inactive'
-    ),
-    (
-        'NOT007',
-        'AD001',
-        'Final project submission deadline extended',
-        '2026-04-08',
-        'Active'
-    );
 -- Guard data for safe partial reruns (prevents FK errors in timetable/lecturer_course).
 INSERT IGNORE INTO lecturer (lec_id, designation)
 SELECT id,
@@ -2250,94 +2139,6 @@ VALUES (
         3,
         'Practical',
         3
-    );
-INSERT INTO event_cal (
-        event_id,
-        user_id,
-        title,
-        description,
-        date,
-        time
-    )
-VALUES (
-        'EVT001',
-        'AD001',
-        'System Maintenance',
-        'Server maintenance downtime',
-        '2026-04-12',
-        '10:00:00'
-    ),
-    (
-        'EVT002',
-        'AD001',
-        'Semester Opening',
-        'Welcome session for new semester',
-        '2026-04-15',
-        '09:00:00'
-    ),
-    (
-        'EVT003',
-        'LEC001',
-        'Extra OOP Lecture',
-        'Revision session before mid exam',
-        '2026-04-10',
-        '14:00:00'
-    ),
-    (
-        'EVT004',
-        'LEC002',
-        'DBMS Workshop',
-        'Hands-on database session',
-        '2026-04-11',
-        '11:00:00'
-    ),
-    (
-        'EVT005',
-        'LEC003',
-        'Practical Lab Session',
-        'Extra coding practice',
-        '2026-04-13',
-        '13:00:00'
-    ),
-    (
-        'EVT006',
-        'TG/2023/1780',
-        'Group Study',
-        'Study with friends for exams',
-        '2026-04-09',
-        '16:00:00'
-    ),
-    (
-        'EVT007',
-        'TG/2023/1781',
-        'Assignment Deadline',
-        'Submit DBMS assignment',
-        '2026-04-10',
-        '23:59:00'
-    ),
-    (
-        'EVT008',
-        'TG/2023/1782',
-        'Presentation Day',
-        'Project presentation',
-        '2026-04-14',
-        '10:00:00'
-    ),
-    (
-        'EVT009',
-        'TG/2022/1785',
-        'Repeat Exam Prep',
-        'Prepare for repeat exams',
-        '2026-04-08',
-        '15:00:00'
-    ),
-    (
-        'EVT010',
-        'TG/2021/1791',
-        'Medical Review',
-        'Doctor follow-up appointment',
-        '2026-04-07',
-        '09:30:00'
     );
 INSERT INTO lecturer_course (lec_id, course_code)
 VALUES ('LEC001', 'ICT2142'),
